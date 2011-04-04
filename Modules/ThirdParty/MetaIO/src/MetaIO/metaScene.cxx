@@ -34,6 +34,7 @@
 #include "metaArrow.h"
 #include "metaTransform.h"
 #include "metaTubeGraph.h"
+#include "metaFEMObject.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -350,6 +351,14 @@ Read(const char *_headerName)
       mesh->SetEvent(m_Event);
       mesh->ReadStream(m_NDims,m_ReadStream);
       m_ObjectList.push_back(mesh);
+      }
+    else if(!strncmp(MET_ReadType(*m_ReadStream).c_str(),"FEMObject",9) ||
+            ((MET_ReadType(*m_ReadStream).size()==0) && !strcmp(suf, "fem")))
+      {
+      MetaFEMObject* femobject = new MetaFEMObject();
+      femobject->SetEvent(m_Event);
+      femobject->ReadStream(m_NDims,m_ReadStream);
+      m_ObjectList.push_back(femobject);
       }
     }
 
