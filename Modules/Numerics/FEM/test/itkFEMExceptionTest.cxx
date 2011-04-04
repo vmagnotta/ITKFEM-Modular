@@ -15,56 +15,60 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-// disable debug warnings in MS compiler
-#ifdef _MSC_VER
-#pragma warning(disable: 4786)
-#endif
 
-#include "itkMacro.h"
+#include "itkFEMException.h"
+#include "itkExceptionObject.h"
 #include "itkFEM.h"
 #include <iostream>
 #include <exception>
 
-
 int itkFEMExceptionTest(int, char *[])
 {
-    try {
-      throw itk::fem::FEMException(__FILE__,__LINE__, "itkFEMException");
+  try
+    {
+    throw itk::fem::FEMException(__FILE__, __LINE__, "itkFEMException");
     }
-    catch (itk::ExceptionObject &) {
-      std::cout << "Exception caught\n";
-    }
-
-    try {
-      throw itk::fem::FEMExceptionIO(__FILE__,__LINE__,"itkFEMExceptionIO","IO exception");
-    }
-    catch (itk::ExceptionObject &) {
-       std::cout << "IO exception caught\n";
+  catch( itk::ExceptionObject & )
+    {
+    std::cout << "Exception caught\n";
     }
 
-    try {
-      throw itk::fem::FEMExceptionWrongClass(__FILE__,__LINE__,"itkFEMExceptionWrongClass");
+  try
+    {
+    throw itk::fem::FEMExceptionIO(__FILE__, __LINE__, "itkFEMExceptionIO", "IO exception");
     }
-    catch (itk::ExceptionObject &) {
-      std::cout << "Wrong class exception caught\n";
-    }
-
-    try {
-      throw itk::fem::FEMExceptionObjectNotFound(__FILE__,__LINE__,"itkFEMExceptionObjectNotFound","baseClassName",0);
-    }
-    catch (itk::ExceptionObject &) {
-      std::cout << "Not found exception caught\n";
+  catch( itk::ExceptionObject & )
+    {
+    std::cout << "IO exception caught\n";
     }
 
-    try {
-      throw itk::fem::FEMExceptionSolution(__FILE__,__LINE__,"itkFEMExceptionSolution","Solution exception");
+  try
+    {
+    throw itk::fem::FEMExceptionWrongClass(__FILE__, __LINE__, "itkFEMExceptionWrongClass");
     }
-    catch (itk::ExceptionObject &) {
-      std::cout << "Solution exception caught\n";
+  catch( itk::ExceptionObject & )
+    {
+    std::cout << "Wrong class exception caught\n";
     }
 
-    std::cout << "Test PASSED!\n";
-    return EXIT_SUCCESS;
+  try
+    {
+    throw itk::fem::FEMExceptionObjectNotFound(__FILE__, __LINE__, "itkFEMExceptionObjectNotFound", "baseClassName", 0);
+    }
+  catch( itk::ExceptionObject & )
+    {
+    std::cout << "Not found exception caught\n";
+    }
+
+  try
+    {
+    throw itk::fem::FEMExceptionSolution(__FILE__, __LINE__, "itkFEMExceptionSolution", "Solution exception");
+    }
+  catch( itk::ExceptionObject & )
+    {
+    std::cout << "Solution exception caught\n";
+    }
+
+  std::cout << "Test PASSED!\n";
+  return EXIT_SUCCESS;
 }
-
-

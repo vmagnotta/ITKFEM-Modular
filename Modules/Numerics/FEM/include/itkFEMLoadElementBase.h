@@ -15,14 +15,16 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #ifndef __itkFEMLoadElementBase_h
 #define __itkFEMLoadElementBase_h
 
 #include "itkFEMLoadBase.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class LoadElement
  * \brief Virtual element load base class.
@@ -40,8 +42,23 @@ namespace fem {
  */
 class LoadElement : public Load
 {
-  FEM_CLASS(LoadElement,Load)
 public:
+  /** Standard class typedefs. */
+  typedef LoadElement              Self;
+  typedef Load                     Superclass;
+  typedef SmartPointer<Self>       Pointer;
+  typedef SmartPointer<const Self> ConstPointer;
+
+  /** Method for creation through the object factory. */
+  itkSimpleNewMacro(Self);
+
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(LoadElement, Load);
+
+  /** CreateAnother method will clone the existing instance of this type,
+   * including its internal member variables. */
+  virtual::itk::LightObject::Pointer CreateAnother(void) const;
+
   /**
    * Float type used in Element and derived classes
    */
@@ -51,18 +68,31 @@ public:
    * Type of array of pointers to element objects
    */
   typedef std::vector<Element::ConstPointer> ElementPointersVectorType;
-  ElementPointersVectorType el;  /** pointers to element objects on which the load acts */
-
-  virtual void Read( std::istream& f, void* info );
-  void Write( std::ostream& f ) const;
 
   // FIXME: should clear vector, not zero it
-  LoadElement() : el(0) {}
+  LoadElement() : m_Element(0)
+  {
+  }
+  void AddNextElement(Element::ConstPointer e);
 
+  Element::ConstPointer GetElement(int i);
+
+  unsigned int GetNumberOfElements(void);
+
+  std::vector<Element::ConstPointer> & GetElementArray();
+
+  // FIXME: Add documentation
+  virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
+  {
+  }
+protected:
+  virtual void PrintSelf(std::ostream& os, Indent indent) const;
+
+  ElementPointersVectorType m_Element;  /** pointers to element objects on which the
+                                   load acts */
 };
 
-FEM_CLASS_INIT(LoadElement)
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif // #ifndef __itkFEMLoadElementBase_h

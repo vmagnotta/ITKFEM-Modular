@@ -80,6 +80,8 @@ add_library(${METAIO_NAMESPACE}
   metaForm.cxx
   metaArray.h
   metaArray.cxx
+  metaFEMObject.h
+  metaFEMObject.cxx
 )
 
 INCLUDE_REGULAR_EXPRESSION("^.*$")
