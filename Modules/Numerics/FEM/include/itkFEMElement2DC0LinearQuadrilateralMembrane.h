@@ -15,26 +15,66 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #ifndef __itkFEMElement2DC0LinearQuadrilateralMembrane_h
 #define __itkFEMElement2DC0LinearQuadrilateralMembrane_h
 
 #include "itkFEMElement2DC0LinearQuadrilateral.h"
 #include "itkFEMElement2DMembrane.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class Element2DC0LinearQuadrilateralMembrane
- * \brief 4-noded finite element class in 2D space for linear elasticity problem
+ * \brief 4-noded finite element class in 2D space.
+ *
+ *The ordering of the nodes is counter clockwise. That is the nodes
+ * should be defined in the following order:
+ *
+ *  3 (0,1)                  2 (1,1)
+ *  *------------------------*
+ *  |                        |
+ *  |                        |
+ *  |                        |
+ *  |                        |
+ *  |                        |
+ *  |                        |
+ *  *------------------------*
+ *  0 (0,0)                  1 (0,1)
+ *
+ * The constitutive equation used is from membrane bending energy.
+ * This class combines the geometry of the FE problem defined in
+ * \link Element2DC0LinearQuadrilateral 
+ * and the physics of the problem defined in
+ * \link Element2DMembrane 
+ * 
+ * \sa Element2DC0LinearQuadrilateralStrain
+ *
  */
-class Element2DC0LinearQuadrilateralMembrane : public Element2DMembrane<Element2DC0LinearQuadrilateral>
+class Element2DC0LinearQuadrilateralMembrane:public Element2DMembrane< Element2DC0LinearQuadrilateral >
 {
-FEM_CLASS(Element2DC0LinearQuadrilateralMembrane,Element2DMembrane<Element2DC0LinearQuadrilateral>)
 public:
+  /** Standard class typedefs. */
+  typedef Element2DC0LinearQuadrilateralMembrane                Self;
+  typedef Element2DMembrane< Element2DC0LinearQuadrilateral >   Superclass;
+  typedef SmartPointer< Self >                                  Pointer;
+  typedef SmartPointer< const Self >                            ConstPointer;
+  
+  /** Method for creation through the object factory. */
+	//itkNewMacro(Self);
+  static Pointer New(void);
+	
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(Element2DC0LinearQuadrilateralMembrane, Element2DMembrane< Element2DC0LinearQuadrilateral >);
 
-  HANDLE_ELEMENT_LOADS();
+  /** CreateAnother method will clone the existing instance of this type,
+   * including its internal member variables. */
+  virtual ::itk::LightObject::Pointer CreateAnother(void) const;
 
+  
+  
   /**
    * Default constructor only clears the internal storage
    */
@@ -45,16 +85,19 @@ public:
    * 4 points and a material.
    */
   Element2DC0LinearQuadrilateralMembrane(
-      NodeIDType n1_,
-      NodeIDType n2_,
-      NodeIDType n3_,
-      NodeIDType n4_,
-      Material::ConstPointer p_ );
+    NodeIDType n1_,
+    NodeIDType n2_,
+    NodeIDType n3_,
+    NodeIDType n4_,
+    Material::ConstPointer p_);
 
-}; // class Element2DC0LinearQuadrilateralMembrane
+protected:
+  virtual void PrintSelf(std::ostream& os, Indent indent) const; 
+  
+  
+};  // class Element2DC0LinearQuadrilateralMembrane
 
-FEM_CLASS_INIT(Element2DC0LinearQuadrilateralMembrane)
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif  // #ifndef __itkFEMElement2DC0LinearQuadrilateralMembrane_h

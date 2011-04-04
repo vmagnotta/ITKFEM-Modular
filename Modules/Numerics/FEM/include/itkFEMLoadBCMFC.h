@@ -20,9 +20,10 @@
 
 #include "itkFEMLoadBase.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class LoadBCMFC
  * \brief Generic linear multi freedom displacement constraint in global coordinate system.
@@ -47,56 +48,64 @@ namespace fem {
  */
 
 // forward declaratons...
-class Solver;
+//class Solver;
 
-class LoadBCMFC : public Load
+class LoadBCMFC:public Load
 {
-  FEM_CLASS(LoadBCMFC,Load)
 public:
+  /** Standard class typedefs. */
+  typedef LoadBCMFC                         Self;
+  typedef Load                              Superclass;
+  typedef SmartPointer< Self >              Pointer;
+  typedef SmartPointer< const Self >        ConstPointer;
+  
+  /** Method for creation through the object factory. */
+	//itkNewMacro(Self);
+	static Pointer New(void);
+  
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(LoadBCMFC, Load);
 
+  
+  /** CreateAnother method will clone the existing instance of this type,
+   * including its internal member variables. */
+  virtual ::itk::LightObject::Pointer CreateAnother(void) const;
+  
+  
   /**
    * \class MFCTerm
    * \brief Class that holds information about one term in MFC constraint equation.
    * \sa LoadBCMFC
    */
   class MFCTerm
-    {
-    public:
+  {
+public:
     /**
      * Pointer to element, which holds the DOF that is affected by MFC
      */
-      Element::ConstPointer m_element;
+    Element::ConstPointer m_element;
 
     /**
      * DOF number within the Element object
      */
-      unsigned int dof;
+    unsigned int dof;
 
     /**
      * Value with which this displacement is multiplied on the lhs of MFC equation
      */
-      Element::Float value;
+    Element::Float value;
 
     /**
      * Constructor for easy object creation.
      */
-      MFCTerm(Element::ConstPointer element_, int dof_, Element::Float value_) : m_element(element_), dof(dof_), value(value_) {}
-
-    };
+    MFCTerm(Element::ConstPointer element_, int dof_,
+            Element::Float value_):m_element(element_), dof(dof_), value(value_) {}
+  };
 
   /**
    * Left hand side of the MFC constraint equation
    */
-  typedef std::vector<MFCTerm> LhsType;
-  LhsType lhs;
-
-  /**
-   * Right hand side of the linear equation that defines the constraints.
-   * It is a vector so that implementation of BC on isotropic elements is easy.
-   * Which value is applied to the master force vector is defined by optional
-   * dim parameter (defaults to 0) in AssembleF function in solver.
-   */
-  vnl_vector<Element::Float> rhs;
+  typedef std::vector< MFCTerm > LhsType;
 
   /** Default constructor */
   LoadBCMFC() {}
@@ -110,23 +119,65 @@ public:
    * \param dof Local DOF number in an element.
    * \param val The fixed value of a DOF.
    */
-  LoadBCMFC(Element::ConstPointer element, int dof, vnl_vector<Element::Float> val);
+  LoadBCMFC(Element::ConstPointer element, int dof, vnl_vector< Element::Float > val);
 
-  /** read a LoadBCMFC object from input stream. */
-  virtual void Read( std::istream& f, void* info );
+  /** Set the index variable for the multi freedom displacement constraint. This is used
+  internally by itk::FEM::Solver*/
+  void SetIndex(int ind);
 
-  /** write a LoadBCMFC object to the output stream. */
-  virtual void Write( std::ostream& f ) const;
+  /** Get the index variable for the multi freedom displacement constraint. This is used
+  internally by itk::FEM::Solver*/
+  int GetIndex();
 
-//private:  // FIXME: CrankNicolsonSolver class, which is derived from Solver class also needs access to Index.
+  /** Add terms to the left hand side of multi freedom displacement constraint*/
+  void AddLeftHandSideTerm(LoadBCMFC::MFCTerm term);
+
+  /** Add terms to the right hand side of multi freedom displacement
+    constraint*/
+  void AddRightHandSideTerm(Element::Float term);
+
+  /** Returns the number of terms used to define the left hand side*/
+  int GetNumberOfLeftHandSideTerms();
+
+  /** Returns the number of terms used to define the right hand side*/
+  int GetNumberOfRightHandSideTerms();
+
+  /** Returns the specified left hand side term*/
+  itk::fem::LoadBCMFC::MFCTerm GetLeftHandSideTerm(int lhs);
+
+  /** Returns the number of terms used to define the right hand side*/
+  Element::Float GetRightHandSideTerm(int rhs);
+
+  /** Returns the array containing the left hand side boundary condition
+    values*/
+  std::vector< MFCTerm >& GetLeftHandSideArray();
+
+  /** Returns the array containing the right hand side boundary condition
+    values*/
+  vnl_vector< Element::Float >& GetRightHandSideArray();
+
+
+//  friend class Solver;
+protected:
+  virtual void PrintSelf(std::ostream& os, Indent indent) const;  
+  
+  //private:  // FIXME: CrankNicolsonSolver class, which is derived from Solver
+  // class also needs access to Index.
   /** used internally by the Solver class */
-  int Index;
-  friend class Solver;
+  int m_Index;
 
+  LhsType m_LeftHandSide;
+
+  /**
+   * Right hand side of the linear equation that defines the constraints.
+   * It is a vector so that implementation of BC on isotropic elements is easy.
+   * Which value is applied to the master force vector is defined by optional
+   * dim parameter (defaults to 0) in AssembleF function in solver.
+   */
+  vnl_vector< Element::Float > m_RightHandSide;
 };
 
-FEM_CLASS_INIT(LoadBCMFC)
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif // #ifndef __itkFEMLoadBCMFC_h

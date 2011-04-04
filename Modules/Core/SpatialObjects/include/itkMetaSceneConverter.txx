@@ -33,7 +33,7 @@
 #include "itkMetaLandmarkConverter.h"
 #include "itkMetaArrowConverter.h"
 #include "itkMetaContourConverter.h"
-
+#include "itkMetaFEMObjectConverter.h"
 
 #include <algorithm>
 
@@ -273,6 +273,16 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
       so = contourConverter.MetaContourToContourSpatialObject(
         (MetaContour *)*it);
       soScene->AddSpatialObject( (SpatialObjectType *)so.GetPointer() );
+      }
+      
+    if(!strncmp((*it)->ObjectTypeName(),"FEMObject",9))
+      {
+      typedef itk::fem::FEMObject<NDimensions> FEMObjectType;
+      MetaFEMObjectConverter<NDimensions> FEMObjectConverter;
+      typename itk::FEMObjectSpatialObject<NDimensions>::Pointer so =
+          FEMObjectConverter.MetaFEMObjectToFEMObjectSpatialObject((MetaFEMObject*)*it);
+      this->SetTransform(so, *it);
+      soScene->AddSpatialObject( so);
       }
 
     it++;
@@ -562,7 +572,22 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
       this->SetTransform( mesh, ( *it )->GetObjectToParentTransform() );
       metaScene->AddObject(mesh);
       }
-
+      
+    if(!strncmp((*it)->GetTypeName(),"FEMObjectSpatialObject",22))
+      {
+      typedef itk::fem::FEMObject<NDimensions> FEMObjectType;
+      MetaFEMObjectConverter<NDimensions> converter;
+      MetaFEMObject* fem = converter.FEMObjectSpatialObjectToMetaFEMObject(
+          dynamic_cast<itk::FEMObjectSpatialObject<NDimensions>*>((*it).GetPointer()));
+      if((*it)->GetParent())
+        {
+        fem->ParentID((*it)->GetParent()->GetId());
+        }
+      fem->Name((*it)->GetProperty()->GetName().c_str());
+      this->SetTransform(fem, (*it)->GetObjectToParentTransform());
+      metaScene->AddObject(fem);
+      }
+      
     it++;
     }
 

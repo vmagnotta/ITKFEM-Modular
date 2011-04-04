@@ -15,49 +15,87 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-// disable debug warnings in MS compiler
-#ifdef _MSC_VER
-#pragma warning(disable: 4786)
-#endif
 
 #include "itkFEMElement2DC0QuadraticTriangularStress.h"
 
-namespace itk {
-namespace fem {
+namespace itk
+{
+namespace fem
+{
+// Explicit New() method, used here because we need to split the itkNewMacro()
+// in order to overload the CreateAnother() method.
+Element2DC0QuadraticTriangularStress::Pointer Element2DC0QuadraticTriangularStress::New(void)
+{
+  Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
+  if(smartPtr.IsNull())
+  {
+    smartPtr = static_cast<Pointer>(new Self);
+  }
+  smartPtr->UnRegister();
+  return smartPtr;
+}
 
-
+// Explicit New() method, used here because we need to split the itkNewMacro()
+// in order to overload the CreateAnother() method.  
+::itk::LightObject::Pointer Element2DC0QuadraticTriangularStress::CreateAnother(void) const
+{
+  ::itk::LightObject::Pointer smartPtr;
+  Pointer copyPtr = Self::New().GetPointer();
+  
+  copyPtr->SetNode(0, this->GetNode(0));
+  copyPtr->SetNode(1, this->GetNode(1));
+  copyPtr->SetNode(2, this->GetNode(2));
+  copyPtr->SetNode(3, this->GetNode(3));
+  copyPtr->SetNode(4, this->GetNode(4));
+  copyPtr->SetNode(5, this->GetNode(5));
+  copyPtr->SetMaterial( this->GetMaterial( ) );
+  copyPtr->SetGlobalNumber( this->GetGlobalNumber() );
+  
+  smartPtr = static_cast<Pointer>(copyPtr);
+  
+  return smartPtr;
+}
+  
 Element2DC0QuadraticTriangularStress
-::Element2DC0QuadraticTriangularStress() : Superclass() {}
+::Element2DC0QuadraticTriangularStress():Superclass() {}
 
 Element2DC0QuadraticTriangularStress
 ::Element2DC0QuadraticTriangularStress(
-      NodeIDType n1_,
-      NodeIDType n2_,
-      NodeIDType n3_,
-      NodeIDType n4_,
-      NodeIDType n5_,
-      NodeIDType n6_,
-      Material::ConstPointer m_) : Superclass()
+  NodeIDType n1_,
+  NodeIDType n2_,
+  NodeIDType n3_,
+  NodeIDType n4_,
+  NodeIDType n5_,
+  NodeIDType n6_,
+  Material::ConstPointer m_):Superclass()
 {
   // Set the geometrical points
-  this->SetNode( 0, n1_ );
-  this->SetNode( 1, n2_ );
-  this->SetNode( 2, n3_ );
-  this->SetNode( 3, n4_ );
-  this->SetNode( 4, n5_ );
-  this->SetNode( 5, n6_ );
+  this->SetNode(0, n1_);
+  this->SetNode(1, n2_);
+  this->SetNode(2, n3_);
+  this->SetNode(3, n4_);
+  this->SetNode(4, n5_);
+  this->SetNode(5, n6_);
 
   /*
    * Initialize the pointer to material object and check that
    * we were given the pointer to the right class.
    * If the material class was incorrect an exception is thrown.
    */
-  if( (m_mat=dynamic_cast<const MaterialLinearElasticity*>(&*m_)) == 0 )
+  m_mat = dynamic_cast< const MaterialLinearElasticity * >( &*m_ );
+  
+  if ( ! m_mat )
     {
-    throw FEMExceptionWrongClass(__FILE__,__LINE__,"Element2DC0QuadraticTriangularStress::Element2DC0QuadraticTriangularStress()");
+    throw FEMExceptionWrongClass(__FILE__,
+                                 __LINE__,
+                                 "Element2DC0QuadraticTriangularStress::Element2DC0QuadraticTriangularStress()");
     }
 }
 
-FEM_CLASS_REGISTER(Element2DC0QuadraticTriangularStress)
+void Element2DC0QuadraticTriangularStress::PrintSelf(std::ostream& os, Indent indent) const
+{
+  Superclass::PrintSelf(os, indent);
+}
 
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem

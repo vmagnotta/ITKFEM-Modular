@@ -15,28 +15,68 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #ifndef __itkFEMElement2DC0QuadraticTriangularStrain_h
 #define __itkFEMElement2DC0QuadraticTriangularStrain_h
 
 #include "itkFEMElement2DC0QuadraticTriangular.h"
 #include "itkFEMElement2DStrain.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class Element2DC0QuadraticTriangularStrain
- * \brief 3-noded finite element class in 2D space for linear elasticity problem.
+ * \brief 6-noded finite element class in 2D space for linear elasticity problem
+ *        that defines a triangle element.
  *
- * This element is combined from Element2DC0LinearTriangular and Element2DStrain.
+ *
+ * The ordering of the nodes is counter clockwise. That is the nodes
+ * should be defined in the following order:
+ *
+ *          (0,1) 
+ *          2 
+ *          *
+ *          |\ 
+ *          |  \
+ *          |    \    
+ *(0,0.5) 5 *      * 4 (0.5, 0.5)
+ *          |        \
+ *          |          \
+ *          *-----*-----*
+ *          0     3      1 
+ *       (0,0)  (0,0.5)  (0,1)
+ *
+ * * This class combines the geometry of the FE problem defined in
+ * \link Element2DC0QuadraticTriangular
+ * and the physics of the problem defined in
+ * \link Element2DStrain
+ * 
+ * \sa Element2DC0LinearTriangularStresså
+ *
  */
-class Element2DC0QuadraticTriangularStrain : public Element2DStrain<Element2DC0QuadraticTriangular>
+class Element2DC0QuadraticTriangularStrain:public Element2DStrain< Element2DC0QuadraticTriangular >
 {
-FEM_CLASS(Element2DC0QuadraticTriangularStrain,Element2DStrain<Element2DC0QuadraticTriangular>)
 public:
+  /** Standard class typedefs. */
+  typedef Element2DC0QuadraticTriangularStrain                     Self;
+  typedef Element2DStrain< Element2DC0QuadraticTriangular >        Superclass;
+  typedef SmartPointer< Self >                                  Pointer;
+  typedef SmartPointer< const Self >                            ConstPointer;
+  
+  /** Method for creation through the object factory. */
+	//itkNewMacro(Self);
+  static Pointer New(void);
+	
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(Element2DC0QuadraticTriangularStrain, Element2DStrain< Element2DC0QuadraticTriangular >);
 
-  HANDLE_ELEMENT_LOADS();
-
+  /** CreateAnother method will clone the existing instance of this type,
+   * including its internal member variables. */
+  virtual ::itk::LightObject::Pointer CreateAnother(void) const;
+  
+  
   /**
    * Default constructor only clears the internal storage
    */
@@ -47,18 +87,21 @@ public:
    * 3 points and a material.
    */
   Element2DC0QuadraticTriangularStrain(
-      NodeIDType n1_,
-      NodeIDType n2_,
-      NodeIDType n3_,
-      NodeIDType n4_,
-      NodeIDType n5_,
-      NodeIDType n6_,
-      Material::ConstPointer p_ );
+    NodeIDType n1_,
+    NodeIDType n2_,
+    NodeIDType n3_,
+    NodeIDType n4_,
+    NodeIDType n5_,
+    NodeIDType n6_,
+    Material::ConstPointer p_);
 
-}; // class Element2DC0QuadraticTriangularStrain
+protected:
+  virtual void PrintSelf(std::ostream& os, Indent indent) const;    
+  
+  
+};  // class Element2DC0QuadraticTriangularStrain
 
-FEM_CLASS_INIT(Element2DC0QuadraticTriangularStrain)
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif  // #ifndef __itkFEMElement2DC0QuadraticTriangularStrain_h

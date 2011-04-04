@@ -23,9 +23,10 @@
 
 #include "itkMacro.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \file itkFEMException.h
  * \brief Declaration of several exception classes that are used
@@ -36,7 +37,7 @@ namespace fem {
  * \class FEMException
  * \brief Base class for all exception's that can occur within FEM classes.
  */
-class FEMException : public itk::ExceptionObject
+class FEMException:public itk::ExceptionObject
 {
 public:
   /**
@@ -47,10 +48,11 @@ public:
    * you should use __FILE__ and __LINE__ macros to specify file name
    * and line number.
    */
-  FEMException(const char *file, unsigned int lineNumber, std::string location="Unknown");
+  FEMException(const char *file, unsigned int lineNumber, std::string location = "Unknown");
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMException() throw() {}
+  virtual ~FEMException()
+  throw( ) {}
 
   /** Type related information. */
   itkTypeMacro(FEMException, ExceptionObject);
@@ -62,7 +64,7 @@ public:
  *
  * This class is normally used when reading or writing objects from/to stream.
  */
-class FEMExceptionIO : public FEMException
+class FEMExceptionIO:public FEMException
 {
 public:
   /**
@@ -73,10 +75,11 @@ public:
   FEMExceptionIO(const char *file, unsigned int lineNumber, std::string location, std::string moreDescription);
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMExceptionIO() throw() {}
+  virtual ~FEMExceptionIO()
+  throw( ) {}
 
   /** Type related information. */
-  itkTypeMacro(FEMExceptionIO,FEMException);
+  itkTypeMacro(FEMExceptionIO, FEMException);
 };
 
 /**
@@ -96,16 +99,17 @@ public:
  * std:exception. Update the bad_cast in ALL files to
  * accomodate this differences. Currently they are ignored.
  */
-class FEMExceptionWrongClass : public FEMException
+class FEMExceptionWrongClass:public FEMException
 {
 public:
   FEMExceptionWrongClass(const char *file, unsigned int lineNumber, std::string location);
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMExceptionWrongClass() throw() {}
+  virtual ~FEMExceptionWrongClass()
+  throw( ) {}
 
   /** Type related information. */
-  itkTypeMacro(FEMExceptionWrongClass,FEMException);
+  itkTypeMacro(FEMExceptionWrongClass, FEMException);
 };
 
 /**
@@ -115,23 +119,27 @@ public:
  * This exception occures, when a search for an object with given
  * global number was unsuccessful.
  */
-class FEMExceptionObjectNotFound : public FEMException
+class FEMExceptionObjectNotFound:public FEMException
 {
 public:
-  FEMExceptionObjectNotFound(const char *file, unsigned int lineNumber, std::string location, std::string baseClassName, int GN);
+  FEMExceptionObjectNotFound(const char *file,
+                             unsigned int lineNumber,
+                             std::string location,
+                             std::string baseClassName,
+                             int GN);
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMExceptionObjectNotFound() throw() {}
+  virtual ~FEMExceptionObjectNotFound()
+  throw( ) {}
 
   /** Type related information. */
-  itkTypeMacro(FEMExceptionObjectNotFound,FEMException);
+  itkTypeMacro(FEMExceptionObjectNotFound, FEMException);
 
   /**
    * Base class of the searched object.
    */
   std::string m_baseClassName;
-  int         m_GN;
-
+  int         m_GlobalNumber;
 };
 
 /**
@@ -141,7 +149,7 @@ public:
  * This class is normally used when an error occurs while the problem is
  * already in memory and something went wrong while trying to solve it.
  */
-class FEMExceptionSolution : public FEMException
+class FEMExceptionSolution:public FEMException
 {
 public:
   /**
@@ -152,13 +160,13 @@ public:
   FEMExceptionSolution(const char *file, unsigned int lineNumber, std::string location, std::string moreDescription);
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMExceptionSolution() throw() {}
+  virtual ~FEMExceptionSolution()
+  throw( ) {}
 
   /** Type related information. */
-  itkTypeMacro(FEMExceptionSolution,FEMException);
-
+  itkTypeMacro(FEMExceptionSolution, FEMException);
 };
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif // #ifndef __itkFEMException_h

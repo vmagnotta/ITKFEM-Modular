@@ -15,26 +15,55 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #ifndef __itkFEMElement3DC0LinearTetrahedronMembrane_h
 #define __itkFEMElement3DC0LinearTetrahedronMembrane_h
 
 #include "itkFEMElement3DC0LinearTetrahedron.h"
 #include "itkFEMElement3DMembrane.h"
 
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class Element3DC0LinearTetrahedronMembrane
- * \brief 4-noded finite element class in 3D space for linear elasticity problem
+ * \brief 4-noded finite element class in 3D space.
+ * The constitutive equation used is from membrane bending energy.
+ *
+ * This class combines the geometry of the FE problem defined in
+ * \link Element3DC0LinearTetrahedron
+ * and the physics of the problem defined in
+ * \link Element3DMembrane
+ *
+ * \sa Element3DC0LinearTetrahedronStrain
+ *
  */
-class Element3DC0LinearTetrahedronMembrane : public Element3DMembrane<Element3DC0LinearTetrahedron>
+class Element3DC0LinearTetrahedronMembrane:public Element3DMembrane< Element3DC0LinearTetrahedron >
 {
-FEM_CLASS(Element3DC0LinearTetrahedronMembrane,Element3DMembrane<Element3DC0LinearTetrahedron>)
 public:
+  /** Standard class typedefs. */
+  typedef Element3DC0LinearTetrahedronMembrane              Self;
+  typedef Element3DMembrane< Element3DC0LinearTetrahedron > Superclass;
+  typedef SmartPointer< Self >                              Pointer;
+  typedef SmartPointer< const Self >                        ConstPointer;
+  
+  /** Method for creation through the object factory. */
+	//itkNewMacro(Self);
+	static Pointer New(void);
+  
+  
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(Element3DC0LinearTetrahedronMembrane, Element3DMembrane< Element3DC0LinearTetrahedron >);
 
-  HANDLE_ELEMENT_LOADS();
-
+  
+  /** 
+   * CreateAnother method will clone the existing instance of this type,
+   * including its internal member variables. 
+   */
+  virtual ::itk::LightObject::Pointer CreateAnother(void) const;
+  
+  
   /**
    * Default constructor only clears the internal storage
    */
@@ -45,13 +74,15 @@ public:
    * an array of 4 points and a material.
    */
   Element3DC0LinearTetrahedronMembrane(
-      NodeIDType ns_[],
-      Material::ConstPointer p_ );
+    NodeIDType ns_[],
+    Material::ConstPointer p_);
+    
+protected:
+  virtual void PrintSelf(std::ostream& os, Indent indent) const;  
+  
+};  // class Element3DC0LinearTetrahedronMembrane
 
-}; // class Element3DC0LinearTetrahedronMembrane
-
-FEM_CLASS_INIT(Element3DC0LinearTetrahedronMembrane)
-
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif  // #ifndef __itkFEMElement3DC0LinearTetrahedronMembrane_h

@@ -15,35 +15,38 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+
 #ifndef __itkFEMLinearSystemWrapperItpack_h
 #define __itkFEMLinearSystemWrapperItpack_h
 
+#include "itkFEMSolution.h"
 #include "itkFEMLinearSystemWrapper.h"
 #include "itkFEMItpackSparseMatrix.h"
 #include <vector>
 
 /** Array of pointers to available solver functions */
 /** typedefs from f2c.h  */
-typedef long      integer;
-typedef double    doublereal;
+typedef long   integer;
+typedef double doublereal;
 
 extern "C" {
-  typedef
-  int (*ItkItpackSolverFunction)(integer *, integer *, integer *, doublereal *, doublereal *, doublereal *, integer *, integer *, doublereal *,
+typedef
+int ( *ItkItpackSolverFunction )(integer *, integer *, integer *, doublereal *, doublereal *, doublereal *, integer *,
+                                 integer *, doublereal *,
                                  integer *, doublereal *, integer *);
 }
 
-
-namespace itk {
-namespace fem {
-
+namespace itk
+{
+namespace fem
+{
 /**
  * \class LinearSystemWrapperItpack
  * \brief LinearSystemWrapper class that uses Itpack numeric library functions
  *        to define and solve a sparse linear system of equations
  * \sa LinearSystemWrapper
  */
-class LinearSystemWrapperItpack : public LinearSystemWrapper
+class LinearSystemWrapperItpack:public LinearSystemWrapper
 {
 public:
 
@@ -57,17 +60,17 @@ public:
   typedef ItpackSparseMatrix MatrixRepresentation;
 
   /** vector of matrices typedef */
-  typedef std::vector<MatrixRepresentation> MatrixHolder;
+  typedef std::vector< MatrixRepresentation > MatrixHolder;
 
   /* auto pointer to vector of matrices typedef */
   /* typedef std::auto_ptr<MatrixHolder> MatrixArrayPtr; */
 
   /** vector representation typedef */
   /* typedef std::auto_ptr<double> VectorRepresentation; */
-  typedef double * VectorRepresentation;
+  typedef double *VectorRepresentation;
 
   /** vector of vector typedef */
-  typedef std::vector<VectorRepresentation> VectorHolder;
+  typedef std::vector< VectorRepresentation > VectorHolder;
 
   /* auto pointer to vector of vectors typedef */
   /* typedef std::auto_ptr<VectorHolder> VectorArrayPtr; */
@@ -376,7 +379,6 @@ public:
    * Set numerical solving method to reduced system semi-iteration */
   void ReducedSystemSemiIteration() { m_Method = 6; }
 
-
   /** -----------------------------------------------------------------
    *
    * Redefine methods defined in LinearSystemWrapper
@@ -389,11 +391,10 @@ public:
    * \param maxNonZeroValues maximum number of entries allowed in matrix
    * \note this must be called before any matrices are initialized
    */
-  virtual void SetMaximumNonZeroValuesInMatrix(unsigned int maxNonZeroValues) {m_MaximumNonZeroValues = maxNonZeroValues;}
-
+  virtual void SetMaximumNonZeroValuesInMatrix(unsigned int maxNonZeroValues) { m_MaximumNonZeroValues =
+                                                                                  maxNonZeroValues; }
 
   void ScaleMatrix(Float scale, unsigned int matrixIndex);
-
 
   /** -----------------------------------------------------------------
    *
@@ -411,7 +412,6 @@ public:
    * destructor
    */
   ~LinearSystemWrapperItpack();
-
 
   /* memory management routines */
   virtual void  InitializeMatrix(unsigned int matrixIndex);
@@ -439,7 +439,7 @@ public:
 
   virtual void  AddMatrixValue(unsigned int i, unsigned int j, Float value, unsigned int matrixIndex);
 
-  virtual void GetColumnsOfNonZeroMatrixElementsInRow( unsigned int row, ColumnArray& cols, unsigned int matrixIndex );
+  virtual void GetColumnsOfNonZeroMatrixElementsInRow(unsigned int row, ColumnArray & cols, unsigned int matrixIndex);
 
   virtual Float GetVectorValue(unsigned int i, unsigned int vectorIndex) const;
 
@@ -455,7 +455,6 @@ public:
 
   virtual void  Solve(void);
 
-
   /* matrix & vector manipulation routines */
   virtual void  SwapMatrices(unsigned int matrixIndex1, unsigned int matrixIndex2);
 
@@ -467,7 +466,9 @@ public:
 
   virtual void  CopyVector2Solution(unsigned int vectorIndex, unsigned int solutionIndex);
 
-  virtual void  MultiplyMatrixMatrix(unsigned int resultMatrixIndex, unsigned int leftMatrixIndex, unsigned int rightMatrixIndex);
+  virtual void  MultiplyMatrixMatrix(unsigned int resultMatrixIndex,
+                                     unsigned int leftMatrixIndex,
+                                     unsigned int rightMatrixIndex);
 
   virtual void  MultiplyMatrixVector(unsigned int resultVectorIndex, unsigned int matrixIndex, unsigned int vectorIndex);
 
@@ -482,12 +483,13 @@ private:
   /** pointer to vector of solution arrays */
   VectorHolder *m_Solutions;
 
-  /** pointer to array of unsigned int's indicating max number of entries in each matrix */
+  /** pointer to array of unsigned int's indicating max number of entries in
+    each matrix */
   //UnsignedIntegerArrayPtr m_MaximumNonZeroValues;
   unsigned int m_MaximumNonZeroValues;
 
   /** Array of pointers to available solver functions */
-  ItkItpackSolverFunction    m_Methods[7];
+  ItkItpackSolverFunction m_Methods[7];
 
   /** flag indicating which solver function should be used */
   integer m_Method;
@@ -497,7 +499,6 @@ private:
 
   /** vector of length 12 used to initialize various parameters on input */
   doublereal m_RPARM[12];
-
 };
 
 /**
@@ -506,11 +507,11 @@ private:
  * \sa LinearSystemWrapperItpack
  * \sa FEMException
  */
-class FEMExceptionItpackSolver : public FEMException
+class FEMExceptionItpackSolver:public FEMException
 {
 public:
   /** typedefs from f2c.h  */
-  typedef long      integer;
+  typedef long integer;
 
   /**
    * Constructor. In order to construct this exception object, four parameters
@@ -520,12 +521,13 @@ public:
   FEMExceptionItpackSolver(const char *file, unsigned int lineNumber, std::string location, integer errorCode);
 
   /** Virtual destructor needed for subclasses. Has to have empty throw(). */
-  virtual ~FEMExceptionItpackSolver() throw() {}
+  virtual ~FEMExceptionItpackSolver()
+  throw( ) {}
 
   /** Type related information. */
-  itkTypeMacro(FEMExceptionItpackSolver,FEMException);
-
+  itkTypeMacro(FEMExceptionItpackSolver, FEMException);
 };
-}} // end namespace itk::fem
+}
+}  // end namespace itk::fem
 
 #endif // #ifndef __itkFEMLinearSystemWrapperItpack_h

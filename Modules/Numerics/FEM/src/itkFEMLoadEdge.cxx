@@ -15,89 +15,105 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-// disable debug warnings in MS compiler
-#ifdef _MSC_VER
-#pragma warning(disable: 4786)
-#endif
 
 #include "itkFEMLoadEdge.h"
 
-namespace itk {
-namespace fem {
-
-/**
- * Read the Load object from input stream
- */
-void LoadEdge::Read( std::istream& f, void* info )
+namespace itk
 {
-  int n,m;
+namespace fem
+{
 
-  /** first call the parent's read function */
-  Superclass::Read(f,info);
-
-  /** ... edge number */
-  this->SkipWhiteSpace(f); f>>n; if(!f) goto out;
-  m_Edge=n;
-  /** ... # of rows */
-  this->SkipWhiteSpace(f); f>>n; if(!f) goto out;
-  /** ... # of cols */
-  this->SkipWhiteSpace(f); f>>m; if(!f) goto out;
-  m_Force.set_size(n,m);
-  for(int i=0; i<n; i++)
-    {
-    this->SkipWhiteSpace(f);
-    for(int j=0; j<m; j++)
-      {
-      f>>m_Force[i][j];
-      }
-    this->SkipWhiteSpace(f);
-    }
-
-
-  out:
-
-  if( !f )
-    {
-    throw FEMExceptionIO(__FILE__,__LINE__,"LoadEdge::Read()","Error reading FEM load!");
-    }
-
+void LoadEdge::SetEdge(int edge)
+{
+  this->m_Edge = edge;
 }
 
-/**
- * Write the Load object to the output stream
- */
-void LoadEdge::Write( std::ostream& f ) const
+int LoadEdge::GetEdge()
 {
-  /** first call the parent's write function */
-  Superclass::Write(f);
-
-  /** Write the actual Load data */
-
-  /** ... edge number */
-  f<<"\t"<<m_Edge<<"\t% Edge number"<<"\n";
-
-  /** ... force matrix */
-  f<<"\t"<<m_Force.rows()<<"\t% # rows in force matrix"<<"\n";
-  f<<"\t"<<m_Force.cols()<<"\t% # cols in force matrix"<<"\n";
-  f<<"\t% force matrix\n";
-  for(int i=0; i<(int)m_Force.rows(); i++)
-    {
-    f<<"\t";
-    for(int j=0; j<(int)m_Force.cols(); j++)
-      {
-      f<<m_Force[i][j]<<" ";
-      }
-    f<<"\n";
-    }
-
-  /** check for errors */
-  if (!f)
-    {
-    throw FEMExceptionIO(__FILE__,__LINE__,"LoadBCMFC::Write()","Error writing FEM load!");
-    }
-
+  return this->m_Edge;
 }
 
-FEM_CLASS_REGISTER(LoadEdge)
+void LoadEdge::SetForce(const vnl_matrix< itk::fem::Element::Float > force)
+{
+  this->m_Force = force;
+}
 
-}} // end namespace itk::fem
+vnl_matrix< itk::fem::Element::Float >& LoadEdge::GetForce()
+{
+  return this->m_Force;
+}
+
+  
+// Explicit New() method, used here because we need to split the itkNewMacro()
+// in order to overload the CreateAnother() method.
+LoadEdge::Pointer LoadEdge::New(void)
+{
+  Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
+  if(smartPtr.IsNull())
+  {
+    smartPtr = static_cast<Pointer>(new Self);
+  }
+  smartPtr->UnRegister();
+  return smartPtr;
+}
+
+// Explicit New() method, used here because we need to split the itkNewMacro()
+// in order to overload the CreateAnother() method.  
+::itk::LightObject::Pointer LoadEdge::CreateAnother(void) const
+{
+  ::itk::LightObject::Pointer smartPtr;
+  Pointer copyPtr = Self::New().GetPointer();
+  
+  copyPtr->m_Edge = this->m_Edge;
+  
+  // vnl_matrix = operator copies all elements
+  copyPtr->m_Force = this->m_Force;
+  
+  for (unsigned int i=0; i < this->m_Element.size(); i++ )
+  {
+    copyPtr->AddNextElement( this->m_Element[i] );
+  }
+  
+  copyPtr->SetGlobalNumber( this->GetGlobalNumber() );
+  
+  smartPtr = static_cast<Pointer>(copyPtr);
+  
+  return smartPtr;
+}
+
+void LoadEdge::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
+{
+  const unsigned int NnDOF = element->GetNumberOfDegreesOfFreedomPerNode();
+  const unsigned int EdgeNum = this->GetEdge();
+  
+  vnl_matrix<itk::fem::Element::Float> Force = this->GetForce();
+  
+  const std::vector< std::vector<int> > EdgeIds = element->GetEdgeIds();
+  
+  Fe.set_size( element->GetNumberOfDegreesOfFreedom() );
+  Fe.fill(0.0);
+  
+  int NEdgePts = (EdgeIds[0]).size();
+  int EdgePt;
+  // access the edge points.
+  for (int i=0; i<NEdgePts; i++)
+  {
+    EdgePt = (EdgeIds[EdgeNum])[i];
+    for (unsigned int j=0; j<NnDOF; j++)
+    {
+      Fe[NnDOF*EdgePt + j] = Fe[NnDOF*EdgePt + j] + Force[i][j];
+    }	  
+  }
+  
+}
+
+void LoadEdge::PrintSelf(std::ostream& os, Indent indent) const
+{
+  Superclass::PrintSelf(os, indent);
+  os << indent << "Edge: " << this->m_Edge << std::endl;
+  os << indent << "Force: " << this->m_Force << std::endl;
+}
+
+  
+}
+}  // end namespace itk::fem
