@@ -24,9 +24,13 @@
 #include "itkSpatialObject.h"
 #include "itkSpatialObjectReader.h"
 #include "itkSpatialObjectWriter.h"
+#include "itkFEMFactoryBase.h"
+
 
 int itkFEMLoadBCMFCTestUser(int argc, char *argv[])
 {
+  itk::FEMFactoryBase::RegisterDefaultTypes();
+  
   typedef itk::fem::Solver<2>    Solver2DType;
   Solver2DType::Pointer solver = Solver2DType::New();
   

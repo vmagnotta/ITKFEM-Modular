@@ -25,9 +25,13 @@
 #include "itkSpatialObject.h"
 #include "itkSpatialObjectReader.h"
 #include "itkSpatialObjectWriter.h"
+#include "itkFEMFactoryBase.h"
+
 
 int itkFEMElement2DC0LinearQuadrilateralStressTest(int argc, char *argv[])
 {
+  itk::FEMFactoryBase::RegisterDefaultTypes();
+  
   const unsigned int Dimension = 2;
   typedef itk::fem::Solver<Dimension>    Solver2DType;
   Solver2DType::Pointer solver = Solver2DType::New();
@@ -93,7 +97,7 @@ int itkFEMElement2DC0LinearQuadrilateralStressTest(int argc, char *argv[])
   l1->SetGlobalNumber(0);
   l1->SetElement( &*femObject->GetElement(0) );
   l1->SetDegreeOfFreedom(0);
-  l1->SetValue( vnl_vector< double >(0, 0.0) );
+  l1->SetValue( vnl_vector< double >(1, 0.0) );
   femObject->AddNextLoad( &*l1);
 
   l1 = itk::fem::LoadBC::New();

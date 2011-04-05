@@ -39,8 +39,8 @@ int itkFEMLandmarkLoadImplementationTest(int argc, char *argv[])
 	typedef itk::SpatialObjectReader<2>    SpatialObjectReaderType;
 	typedef SpatialObjectReaderType::Pointer            SpatialObjectReaderPointer;
 	SpatialObjectReaderPointer SpatialReader = SpatialObjectReaderType::New();
-	SpatialReader->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/LoadLandmarkTest.meta");
-//	SpatialReader->SetFileName( argv[1] );
+//	SpatialReader->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/LoadLandmarkTest.meta");
+	SpatialReader->SetFileName( argv[1] );
 	SpatialReader->Update();
 
 	SpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
@@ -86,8 +86,8 @@ int itkFEMLandmarkLoadImplementationTest(int argc, char *argv[])
 	typedef SpatialObjectWriterType::Pointer            SpatialObjectWriterPointer;
 	SpatialObjectWriterPointer SpatialWriter = SpatialObjectWriterType::New();
 	SpatialWriter->SetInput(femSODef);
-//	SpatialWriter->SetFileName( argv[2] );
-	SpatialWriter->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/LoadLandmarkTestWrite.meta");
+	SpatialWriter->SetFileName( argv[2] );
+//	SpatialWriter->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/LoadLandmarkTestWrite.meta");
 	SpatialWriter->Update();
 
 	std::cout << "Test PASSED!" << std::endl;
