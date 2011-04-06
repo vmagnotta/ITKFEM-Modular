@@ -23,42 +23,7 @@ namespace itk
 namespace fem
 {
 
-void LoadEdge::SetEdge(int edge)
-{
-  this->m_Edge = edge;
-}
-
-int LoadEdge::GetEdge()
-{
-  return this->m_Edge;
-}
-
-void LoadEdge::SetForce(const vnl_matrix< itk::fem::Element::Float > force)
-{
-  this->m_Force = force;
-}
-
-vnl_matrix< itk::fem::Element::Float >& LoadEdge::GetForce()
-{
-  return this->m_Force;
-}
-
-  
-// Explicit New() method, used here because we need to split the itkNewMacro()
-// in order to overload the CreateAnother() method.
-LoadEdge::Pointer LoadEdge::New(void)
-{
-  Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
-  if(smartPtr.IsNull())
-  {
-    smartPtr = static_cast<Pointer>(new Self);
-  }
-  smartPtr->UnRegister();
-  return smartPtr;
-}
-
-// Explicit New() method, used here because we need to split the itkNewMacro()
-// in order to overload the CreateAnother() method.  
+// Overload the CreateAnother() method.  
 ::itk::LightObject::Pointer LoadEdge::CreateAnother(void) const
 {
   ::itk::LightObject::Pointer smartPtr;
@@ -80,6 +45,29 @@ LoadEdge::Pointer LoadEdge::New(void)
   
   return smartPtr;
 }
+  
+  
+void LoadEdge::SetEdge(int edge)
+{
+  this->m_Edge = edge;
+}
+
+int LoadEdge::GetEdge()
+{
+  return this->m_Edge;
+}
+
+void LoadEdge::SetForce(const vnl_matrix< itk::fem::Element::Float > force)
+{
+  this->m_Force = force;
+}
+
+vnl_matrix< itk::fem::Element::Float >& LoadEdge::GetForce()
+{
+  return this->m_Force;
+}
+
+
 
 void LoadEdge::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
 {

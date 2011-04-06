@@ -22,20 +22,6 @@ namespace itk
 {
 namespace fem
 {
-  
-// Explicit New() method, used here because we need to split the itkNewMacro()
-// in order to overload the CreateAnother() method.
-Element3DC0LinearHexahedronMembrane::Pointer Element3DC0LinearHexahedronMembrane::New(void)
-{
-  Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
-  if(smartPtr.IsNull())
-  {
-    smartPtr = static_cast<Pointer>(new Self);
-  }
-  smartPtr->UnRegister();
-  return smartPtr;
-}
-
 // Overload the CreateAnother() method
 ::itk::LightObject::Pointer Element3DC0LinearHexahedronMembrane::CreateAnother(void) const
 {

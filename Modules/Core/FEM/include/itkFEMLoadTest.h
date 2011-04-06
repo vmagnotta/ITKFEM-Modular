@@ -44,17 +44,7 @@ public:
   typedef SmartPointer< const Self >    ConstPointer;
   
   /** Method for creation through the object factory. */
-	//itkNewMacro(Self);
-	static Pointer New(void)
-  {
-    Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
-    if(smartPtr.IsNull())
-    {
-      smartPtr = static_cast<Pointer>(new Self);
-    }
-    smartPtr->UnRegister();
-    return smartPtr;
-  }
+	itkSimpleNewMacro(Self);
   
   /** Run-time type information (and related methods). */
   itkTypeMacro(LoadTest, LoadElement);

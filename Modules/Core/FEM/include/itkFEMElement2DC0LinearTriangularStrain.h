@@ -64,8 +64,7 @@ public:
   typedef SmartPointer< const Self >                            ConstPointer;
   
   /** Method for creation through the object factory. */
-	//itkNewMacro(Self);
-	static Pointer New(void);
+	itkSimpleNewMacro(Self);
   
   /** Run-time type information (and related methods). */
   itkTypeMacro(Element2DC0LinearTriangularStrain, Element2DStrain< Element2DC0LinearTriangular >);

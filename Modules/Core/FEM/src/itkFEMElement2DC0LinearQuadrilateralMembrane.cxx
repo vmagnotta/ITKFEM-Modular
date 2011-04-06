@@ -22,22 +22,7 @@ namespace itk
 {
 namespace fem
 {
-  
-// Explicit New() method, used here because we need to split the itkNewMacro()
-// in order to overload the CreateAnother() method.
-Element2DC0LinearQuadrilateralMembrane::Pointer Element2DC0LinearQuadrilateralMembrane::New(void)
-{
-  Pointer smartPtr = ::itk::ObjectFactory< Self >::Create();
-  if(smartPtr.IsNull())
-  {
-    smartPtr = static_cast<Pointer>(new Self);
-  }
-  smartPtr->UnRegister();
-  return smartPtr;
-}
-
-// Explicit New() method, used here because we need to split the itkNewMacro()
-// in order to overload the CreateAnother() method.  
+// Overload the CreateAnother() method.  
 ::itk::LightObject::Pointer Element2DC0LinearQuadrilateralMembrane::CreateAnother(void) const
 {
   ::itk::LightObject::Pointer smartPtr;

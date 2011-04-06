@@ -45,9 +45,8 @@ public:
   typedef SmartPointer< Self >        Pointer; 
   typedef SmartPointer< const Self >  ConstPointer;
   
-  //itkNewMacro(Self);
   /** New macro for creation of through the object factory. */
-  static Pointer New(void);
+  itkSimpleNewMacro(Self);
   
   /** Run-time type information (and related methods). */
   itkTypeMacro(LoadNode, Load);
