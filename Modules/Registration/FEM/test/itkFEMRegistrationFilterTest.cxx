@@ -1,50 +1,48 @@
 /*=========================================================================
- *
- *  Copyright Insight Software Consortium
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0.txt
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *=========================================================================*/
+
+  Program:   Insight Segmentation & Registration Toolkit
+  Module:    itkFEMRegistrationFilterTest.cxx
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) Insight Software Consortium. All rights reserved.
+  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
 #endif
 
 #include <fstream>
 #include "itkFEMRegistrationFilter.h"
-#include "itkFEMImageMetricLoadImplementation.h"
 
 #include "itkIndex.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkCommand.h"
+#include "itkFEMObject.h"
 #include "vnl/vnl_math.h"
 
 // tyepdefs necessary for FEM visitor dispatcher
-
+  
   typedef unsigned char PixelType;
-  typedef itk::Image<PixelType,3> testImageType;
+  typedef itk::Image<PixelType,3> testImageType;  
   typedef itk::fem::Element3DC0LinearHexahedronMembrane   ElementType;
 //  typedef itk::fem::Element2DC0LinearQuadrilateralMembrane   ElementType;
 
-//#ifdef  USEIMAGEMETRIC
+//#ifdef  USEIMAGEMETRIC 
   typedef itk::fem::ImageMetricLoad<testImageType,testImageType>     ImageLoadType2;
 //#else
   typedef itk::fem::FiniteDifferenceFunctionLoad<testImageType,testImageType>     ImageLoadType;
-//#endif
-  template class itk::fem::ImageMetricLoadImplementation<ImageLoadType>;
-  typedef ElementType::LoadImplementationFunctionPointer     LoadImpFP;
-  typedef ElementType::LoadType                              ElementLoadType;
-  typedef itk::fem::VisitorDispatcher<ElementType,ElementLoadType, LoadImpFP>
-                                                          DispatcherType;
+//#endif 
+
+
+
 
 // Template function to fill in an image with a value
 template <class TImage>
@@ -57,7 +55,7 @@ typename TImage::PixelType value )
  typedef itk::ImageRegionIteratorWithIndex<TImage> Iterator;
  Iterator it( image, image->GetBufferedRegion() );
  it.Begin();
-
+    
  for( ; !it.IsAtEnd(); ++it )
   {
    it.Set( value );
@@ -80,7 +78,7 @@ typename TImage::PixelType backgnd )
   typedef itk::ImageRegionIteratorWithIndex<TImage> Iterator;
   Iterator it( image, image->GetBufferedRegion() );
   it.Begin();
-
+    
   typename TImage::IndexType index;
   double r2 = vnl_math_sqr( radius );
 
@@ -93,7 +91,7 @@ typename TImage::PixelType backgnd )
       distance += vnl_math_sqr((double) index[j] - center[j]);
       }
     if( distance <= r2 ) it.Set( foregnd );
-    else it.Set( backgnd );
+    else it.Set( backgnd ); 
     }
 
 }
@@ -138,11 +136,11 @@ int itkFEMRegistrationFilterTest(int, char* [] )
 
   IndexType index;
   index.Fill( 0 );
-
+ 
   RegionType region;
   region.SetSize( size );
   region.SetIndex( index );
-
+  
   testImageType::Pointer moving = testImageType::New();
   testImageType::Pointer fixed = testImageType::New();
   FieldType::Pointer initField = FieldType::New();
@@ -154,7 +152,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
   fixed->SetLargestPossibleRegion( region );
   fixed->SetBufferedRegion( region );
   fixed->Allocate();
-
+  
   initField->SetLargestPossibleRegion( region );
   initField->SetBufferedRegion( region );
   initField->Allocate();
@@ -164,7 +162,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
   PixelType fgnd = 250;
   PixelType bgnd = 15;
 
-  // fill moving with circle
+  // fill moving with circle 
   center[0] = 16; center[1] = 16; center[2] = 16;radius = 5;
   FillWithCircle<testImageType>( moving, center, radius, fgnd, bgnd );
 
@@ -179,31 +177,23 @@ int itkFEMRegistrationFilterTest(int, char* [] )
 
   //-------------------------------------------------------------
   std::cout << "Run registration and warp moving" << std::endl;
-
-
-  // register the elements with visitor dispatcher
-  {
-    typedef itk::fem::ImageMetricLoadImplementation<ImageLoadType> iml;
-    ElementType::LoadImplementationFunctionPointer fp = &iml::ImplementImageMetricLoad;
-    DispatcherType::RegisterVisitor((ImageLoadType*)0,fp);
-  }
-
+  
   for (int met=0; met<6; met++)
     {
-
-    typedef itk::fem::FEMRegistrationFilter<testImageType,testImageType> RegistrationType;
+    typedef itk::fem::FEMObject<3> FEMObjectType;
+    typedef itk::fem::FEMRegistrationFilter<testImageType,testImageType, FEMObjectType> RegistrationType;
     RegistrationType::Pointer registrator = RegistrationType::New();
     registrator->SetFixedImage( fixed );
     registrator->SetMovingImage( moving );
-
-    registrator->DoMultiRes(true);
+  
+    registrator->SetUseMultiResolution(true);
     registrator->SetNumLevels(1);
-    registrator->SetMaxLevel(1);
+    registrator->SetMaxLevel(1); 
     registrator->SetMovingImage( moving );
     registrator->SetFixedImage( fixed );
 //  registrator->SetTemp(1.0);
     registrator->ChooseMetric((float)met);
-    unsigned int maxiters=5;
+    unsigned int maxiters=5;  
     float e=1.e6;
     float p=1.e5;
 //  std::cout << " input num iters, e, p: ";  std::cin >> maxiters >> e >> p;
@@ -214,49 +204,49 @@ int itkFEMRegistrationFilterTest(int, char* [] )
     registrator->SetMaximumIterations( maxiters,0 );
     registrator->SetMeshPixelsPerElementAtEachResolution(4,0);
     registrator->SetWidthOfMetricRegion(0 ,0);
-    if ( met == 0 || met == 5)
+    if ( met == 0 || met == 5) 
       registrator->SetWidthOfMetricRegion(0 ,0);
-    else
+    else 
       registrator->SetWidthOfMetricRegion(1 ,0);
     registrator->SetNumberOfIntegrationPoints(2,0);
     registrator->SetDescentDirectionMinimize();
     registrator->SetDescentDirectionMaximize();
-    registrator->DoLineSearch(false);
+    registrator->SetDoLineSearchOnImageEnergy( 0 );
     registrator->SetTimeStep(1.);
-    if (met == 0)
-      {
-      registrator->DoLineSearch((int)2);
-      registrator->EmployRegridding(true);
+    if (met == 0)   
+      { 
+      registrator->SetDoLineSearchOnImageEnergy((int)2);
+      registrator->SetEmployRegridding(true);
       }
-    else
+    else 
       {
-      registrator->DoLineSearch((int)0);
-      registrator->EmployRegridding(false);
+      registrator->SetDoLineSearchOnImageEnergy((int)0);
+      registrator->SetEmployRegridding(false);
       }
     registrator->UseLandmarks(false);
-
+  
     itk::fem::MaterialLinearElasticity::Pointer m;
     m=itk::fem::MaterialLinearElasticity::New();
-    m->GN=0;       // Global number of the material ///
-    m->E=registrator->GetElasticity();  // Young modulus -- used in the membrane ///
-    m->A=1.0;     // Crossection area ///
-    m->h=1.0;     // Crossection area ///
-    m->I=1.0;    // Moment of inertia ///
-    m->nu=0.; //.0;    // poissons -- DONT CHOOSE 1.0!!///
-    m->RhoC=1.0;
-
-    // Create the element type
+    m->SetGlobalNumber(0);       // Global number of the material ///
+    m->SetYoungsModulus(registrator->GetElasticity());  // Young modulus -- used in the membrane ///
+    m->SetCrossSectionalArea(1.0);     // Crossection area ///
+    m->SetThickness(1.0);     // Crossection area ///
+    m->SetMomentOfInertia(1.0);    // Moment of inertia ///
+    m->SetPoissonsRatio(0.); //.0;    // poissons -- DONT CHOOSE 1.0!!///
+    m->SetDensityHeatProduct(1.0);
+  
+    // Create the element type 
     ElementType::Pointer e1 = ElementType::New();
-    e1->m_mat=dynamic_cast<itk::fem::MaterialLinearElasticity*>( m );
-    registrator->SetElement(e1);
+    e1->SetMaterial(dynamic_cast<itk::fem::MaterialLinearElasticity*>( &*m ));
+    registrator->SetElement(&*e1);
     registrator->SetMaterial(m);
 
     registrator->Print( std::cout );
 
-
+  
     try
       {
-      // Register the images
+      // Register the images 
       registrator->RunRegistration();
       }
     catch(... )
@@ -271,7 +261,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
       }
     delete e1;
     delete m;
-
+    
     }
 
   /*
@@ -296,7 +286,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
     ++warpedIter;
     }
 
-  std::cout << "Number of pixels different: " << numPixelsDifferent;
+  std::cout << "Number of pixels different: " << numPixelsDifferent; 
   std::cout << std::endl;
 
   if( numPixelsDifferent > 400 )
@@ -306,12 +296,12 @@ int itkFEMRegistrationFilterTest(int, char* [] )
     }
 
 
-
+  
   std::cout << "Test passed" << std::endl;
   */
 
   return EXIT_SUCCESS;
-
+  
 
 }
 

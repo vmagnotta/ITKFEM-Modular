@@ -71,6 +71,8 @@ vnl_matrix< itk::fem::Element::Float >& LoadEdge::GetForce()
 
 void LoadEdge::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
 {
+  element->PopulateEdgeIds();
+  
   const unsigned int NnDOF = element->GetNumberOfDegreesOfFreedomPerNode();
   const unsigned int EdgeNum = this->GetEdge();
   

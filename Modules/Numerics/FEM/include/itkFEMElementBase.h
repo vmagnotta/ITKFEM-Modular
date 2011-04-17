@@ -686,11 +686,15 @@ private:
    */
   virtual unsigned int GetNumberOfDegreesOfFreedomPerNode(void) const = 0;
 
-
+  /**
+   * FIXME DOCUMENATION HERE
+   */
+  virtual void PopulateEdgeIds(void) const;
+  
 protected:
 	// to store edge connectivity data
 	std::vector< std::vector<int> > m_EdgeIds;
-	virtual void PopulateEdgeIds(void) const;
+	
 	virtual void PrintSelf(std::ostream& os, Indent indent) const;  
 
 };
