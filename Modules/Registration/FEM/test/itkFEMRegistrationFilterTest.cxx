@@ -253,15 +253,10 @@ int itkFEMRegistrationFilterTest(int, char* [] )
       {
       //fixme - changes to femparray cause it to fail : old version works
       std::cout << "Caught an exception: " << std::endl;
-      delete e1;
-      delete m;
       return EXIT_FAILURE;
       //    std::cout << err << std::endl;
       //throw err;
       }
-    delete e1;
-    delete m;
-    
     }
 
   /*
