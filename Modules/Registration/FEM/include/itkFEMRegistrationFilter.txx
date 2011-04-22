@@ -110,7 +110,7 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMRegistrationFilte
   m_Field=NULL;
   m_TotalField=NULL;
   m_WarpedImage=NULL;
-
+  
   // Setup the default interpolator
   typename DefaultInterpolatorType::Pointer interp =
     DefaultInterpolatorType::New();
@@ -2212,6 +2212,87 @@ Element::Float FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::Golde
   return vcl_fabs(static_cast<double>(fmin));
 }
 
+template<class TMovingImage,class TFixedImage,class TFemObject>
+void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::
+AddLandmark(PointType source, PointType target)
+{
+  typename LoadLandmark::Pointer newLandmark = LoadLandmark::New();
+  
+  vnl_vector< Float > localSource;
+  vnl_vector< Float > localTarget;
+  localSource.set_size(ImageDimension);
+  localTarget.set_size(ImageDimension);
+  for (unsigned int i=0;i<ImageDimension;i++)
+  {
+    localSource[i] = source[i];
+    localTarget[i] = target[i];
+  }
+  
+  newLandmark->SetSource( localSource );
+  newLandmark->SetTarget( localTarget );
+  newLandmark->SetPoint( localSource );
+  
+  m_LandmarkArray.push_back( newLandmark );
+}
+
+template<class TMovingImage,class TFixedImage,class TFemObject>
+void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::
+InsertLandmark(unsigned int index, PointType source, PointType target)
+{
+  typename LoadLandmark::Pointer newLandmark = LoadLandmark::New();
+  
+  vnl_vector< Float > localSource;
+  vnl_vector< Float > localTarget;
+  localSource.set_size(ImageDimension);
+  localTarget.set_size(ImageDimension);
+  for (unsigned int i=0;i<ImageDimension;i++)
+  {
+    localSource[i] = source[i];
+    localTarget[i] = target[i];
+  }
+  
+  newLandmark->SetSource( localSource );
+  newLandmark->SetTarget( localTarget );
+  newLandmark->SetPoint( localSource );
+  
+  m_LandmarkArray.insert( m_LandmarkArray.begin()+index, newLandmark );
+}
+
+  
+template<class TMovingImage,class TFixedImage,class TFemObject>
+void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::
+DeleteLandmark(unsigned int index)
+{
+  m_LandmarkArray.erase( m_LandmarkArray.begin()+index );
+}
+
+  
+template<class TMovingImage,class TFixedImage,class TFemObject>
+void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::
+ClearLandmarks()
+{
+  m_LandmarkArray.clear( );
+}
+
+  
+template<class TMovingImage,class TFixedImage,class TFemObject>
+void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::
+GetLandmark(unsigned int index, PointType& source, PointType& target)
+{
+  Element::VectorType localSource;
+  Element::VectorType localTarget;
+  
+  localTarget = m_LandmarkArray[index]->GetTarget();
+  localSource = m_LandmarkArray[index]->GetSource();
+  
+  for (unsigned int i=0;i<ImageDimension;i++)
+  {
+    source[i] = localSource[i];
+    target[i] = localTarget[i];
+  }
+}
+  
+  
 
 template<class TMovingImage,class TFixedImage,class TFemObject>
 void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::

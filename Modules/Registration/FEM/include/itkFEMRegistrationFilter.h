@@ -132,7 +132,8 @@ public:
   typedef TFemObjectType                                 FEMObjectType;
   typedef typename FixedImageType::PixelType             PixelType;
   typedef typename FixedImageType::SizeType              ImageSizeType;
-
+  typedef typename FixedImageType::PointType             PointType;
+ 
   /** Dimensionality of input and output data is assumed to be the same. */
   itkStaticConstMacro(ImageDimension, unsigned int,
                       FixedImageType::ImageDimension);
@@ -272,9 +273,14 @@ typedef  typename FieldType::Pointer FieldPointer;
 
   //FIXME
   /** Add a way to include landmarks ***/
+  void AddLandmark(PointType source, PointType target);
+  void InsertLandmark(unsigned int i, PointType source, PointType target);
+  void DeleteLandmark(unsigned int i);
+  void ClearLandmarks();
+  void GetLandmark(unsigned int i, PointType& source, PointType& target);
+  
 
-
-  /** This determines if the landmark points will be read */
+  /** This determines if the landmark points will be used in the FEM Formulation */
   void UseLandmarks(bool b)
     {
     m_UseLandmarks=b;
