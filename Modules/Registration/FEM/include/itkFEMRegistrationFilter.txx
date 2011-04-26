@@ -122,6 +122,9 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMRegistrationFilte
   m_Load = 0;
   
   m_EmployRegridding = 1;
+  
+  m_FEMObject = NULL;
+  m_CreateMeshFromImage = true;
 
 }
 
@@ -140,8 +143,17 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::RunRegistration
     mySolver->SetDeltaT(m_TimeStep);
     mySolver->SetRho(m_Rho[m_CurrentLevel]);
     mySolver->SetAlpha(m_Alpha);
-    CreateMesh(static_cast<double>(m_MeshPixelsPerElementAtEachResolution[m_CurrentLevel]),
-               mySolver,m_FullImageSize);
+    
+    if ( m_CreateMeshFromImage )
+    {
+      CreateMesh(static_cast<double>(m_MeshPixelsPerElementAtEachResolution[m_CurrentLevel]),
+                 mySolver,m_FullImageSize);
+    }
+    else
+    {
+      m_FEMObject = GetInputFEMObject( 0 );
+    }
+    
     ApplyLoads(m_FullImageSize);
 
     const unsigned int ndofpernode=(m_Element)->GetNumberOfDegreesOfFreedomPerNode();
@@ -157,24 +169,12 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::RunRegistration
     itpackWrapper.SetMaximumNonZeroValuesInMatrix(nzelts);
     itpackWrapper.SetMaximumNumberIterations(2*mySolver->GetOutput()->GetNumberOfDegreesOfFreedom());
     itpackWrapper.SetTolerance(1.e-1);
-    //    itpackWrapper.JacobianSemiIterative();
+    // itpackWrapper.JacobianSemiIterative();
     itpackWrapper.JacobianConjugateGradient();
     mySolver->SetLinearSystemWrapper(&itpackWrapper);
-
-//VAM - Moved to Solver
-#if 0
-    if( m_UseMassMatrix )
-      {
-      mySolver->AssembleKandM();
-      }
-    else
-      {
-      mySolver->InitializeForSolution();
-      mySolver->AssembleK();
-      }
-#endif
+    mySolver->SetUseMassMatrix( m_UseMassMatrix ); 
     IterativeSolve(mySolver);
-    //    InterpolateVectorField(&mySolver);
+    // InterpolateVectorField(&mySolver);
     }
   else //if (m_Maxiters[m_CurrentLevel] > 0)
     {
@@ -231,7 +231,7 @@ template<class TMovingImage,class TFixedImage,class TFemObject>
 typename FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMObjectType* 
 FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::GetInputFEMObject(unsigned int level)
 {
-  return const_cast<FEMObjectType *>(this->GetNthInput(2+level));
+  return static_cast<FEMObjectType *>(this->ProcessObject::GetInput(2+level));
 }
 
 
@@ -355,217 +355,6 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ChooseMetric(un
 #endif
 }
 
-#if 0
-template<class TMovingImage,class TFixedImage,class TFemObject>
-bool FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ReadConfigFile(const char* fname)
-// Reads the parameters necessary to configure the example & returns
-// false if no configuration file is found
-{
-  std::ifstream f;
-  char buffer[4096] = {'\0'};
-  Float fbuf = 0.0;
-  unsigned int ibuf = 0;
-  unsigned int jj;
-
-  std::cout << "Reading config file..." << fname << std::endl;
-  f.open(fname);
-  if (f)
-    {
-
-    this->DoMultiRes(true);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    this->m_NumLevels = (unsigned int) ibuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    this->m_MaxLevel = ibuf;
-
-    // get the initial scales for the pyramid
-    FEMLightObject::SkipWhiteSpace(f);
-    for (jj=0; jj<ImageDimension; jj++)
-      {
-      f >> ibuf;
-      m_ImageScaling[jj] = ibuf;
-      }
-
-    this->m_MeshPixelsPerElementAtEachResolution.set_size(m_NumLevels);
-    FEMLightObject::SkipWhiteSpace(f);
-    for (jj=0; jj<this->m_NumLevels; jj++)
-      {
-      f >> ibuf;
-      this->m_MeshPixelsPerElementAtEachResolution(jj) = ibuf;
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_E.set_size(m_NumLevels);
-    for (jj=0; jj<this->m_NumLevels; jj++)
-      {
-      f >> fbuf;
-      this->SetElasticity(fbuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_Rho.set_size(m_NumLevels);
-    for (jj=0; jj<this->m_NumLevels; jj++)
-      {
-      f >> fbuf;
-      this->SetRho(fbuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_Gamma.set_size(m_NumLevels);
-    for (jj=0; jj<this->m_NumLevels; jj++)
-      {
-      f >> fbuf;
-      this->SetGamma(fbuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_NumberOfIntegrationPoints.set_size(m_NumLevels);
-    for(jj=0; jj< m_NumLevels; jj++)
-      {
-      f >> ibuf;
-      this->SetNumberOfIntegrationPoints(ibuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_MetricWidth.set_size(m_NumLevels);
-    for(jj=0; jj< m_NumLevels; jj++)
-      {
-      f >> ibuf;
-      this->SetWidthOfMetricRegion(ibuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    this->m_Maxiters.set_size(m_NumLevels);
-    for (jj=0; jj<this->m_NumLevels; jj++)
-      {
-      f >> ibuf;
-      this->SetMaximumIterations(ibuf,jj);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    float fbuf2=1.0;
-    f >> fbuf;
-    f >> fbuf2;
-    m_Temp=fbuf2;
-    this->ChooseMetric(fbuf);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> fbuf;
-    this->m_Alpha=fbuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    if (ibuf == 0)
-      {
-      this->SetDescentDirectionMinimize();
-      }
-    else
-      {
-      this->SetDescentDirectionMaximize();
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    this->DoLineSearch(ibuf);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> fbuf;
-    this->SetTimeStep(fbuf);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> fbuf;
-    this->SetEnergyReductionFactor(fbuf);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    m_EmployRegridding = (unsigned int) ibuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    this->m_FullImageSize[0] = ibuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    this->m_FullImageSize[1] = ibuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    unsigned int dim=2;
-    if (ibuf > 0) dim=3;
-    if (dim == 3) this->m_FullImageSize[2] = ibuf;
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-    this->SetMovingFile(buffer);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-    this->SetFixedFile(buffer);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-
-    if (ibuf == 1)
-      {
-      this->UseLandmarks(true);
-      this->SetLandmarkFile(buffer);
-      }
-    else
-      {
-      this->UseLandmarks(false);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-    this->SetResultsFile(buffer);
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-
-    if (ibuf == 1)
-      {
-      this->SetWriteDisplacements(true);
-      this->SetDisplacementsFile(buffer);
-      }
-    else
-      {
-      this->SetWriteDisplacements(false);
-      }
-
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> ibuf;
-    FEMLightObject::SkipWhiteSpace(f);
-    f >> buffer;
-
-    if (ibuf == 1)
-      {
-      this->m_ReadMeshFile=true;
-      this->m_MeshFileName=buffer;
-      }
-    else
-      {
-      this->m_ReadMeshFile=false;
-      }
-
-    f.close();
-    std::cout << "Example configured. E " << m_E << " rho " << m_Rho << std::endl;
-    return true;
-    }
-  else
-    {
-    std::cout << "No configuration file specified...quitting.\n";
-    return false;
-    }
-}
-#endif
 
 template<class TMovingImage,class TFixedImage,class TFemObject>
 int FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::WriteDisplacementFieldMultiComponent()
@@ -690,49 +479,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
   
 /***VAM***/
 #if 0
-  if (m_ReadMeshFile)
-    {
-    
-    	typedef itk::SpatialObject<ImageDimension>    SpatialObjectType;
-	typedef SpatialObjectType::Pointer            SpatialObjectPointer;
-	SpatialObjectPointer Spatial = SpatialObjectType::New();
-
-	typedef itk::SpatialObjectReader<ImageDimension>    SpatialObjectReaderType;
-	typedef SpatialObjectReaderType::Pointer            SpatialObjectReaderPointer;
-	SpatialObjectReaderPointer SpatialReader = SpatialObjectReaderType::New();
-	SpatialReader->SetFileName( m_MeshFileName.c_str() );
-	SpatialReader->Update();
-
-	SpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
-	if(!myScene)
-	{
-		return ;
-	}
-
-	// Testing the fe mesh validity
-	typedef itk::FEMObjectSpatialObject<ImageDimension>    FEMObjectSpatialObjectType;
-	typedef FEMObjectSpatialObjectType::Pointer            FEMObjectSpatialObjectPointer;
-
-	FEMObjectSpatialObjectType::ChildrenListType* children = SpatialReader->GetGroup()->GetChildren();
-	if(strcmp((*(children->begin()))->GetTypeName(),"FEMObjectSpatialObject"))
-	{
-		return ;
-	}
-
-	FEMObjectSpatialObjectType::Pointer femSO = 
-		dynamic_cast<FEMObjectSpatialObjectType*>((*(children->begin())).GetPointer());
-
-	femSO->GetFEMObject()->FinalizeMesh();
-	
-    femObject->DeepCopy(femSO->GetFEMObject());
-
-    itk::fem::MaterialLinearElasticity::Pointer m=dynamic_cast<MaterialLinearElasticity*>(femObject->GetMaterial(0));
-    if (m)
-      {
-      m->SetYoungsModulus(this->GetElasticity(m_CurrentLevel));  // Young modulus -- used in the membrane ///
-      }
-      
-      m_Element = femObject->GetElement(0);
+   /* WHY WAS THIS HERE - ISN"T EVERYTHING HERE IN WORLD COORDINATES????????????? */
     // now scale the mesh to the current scale
     Element::VectorType coord;
     
@@ -754,21 +501,8 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
   if (ImageDimension == 2 && dynamic_cast<Element2DC0LinearQuadrilateral*>(&*m_Element) != NULL)
     {
     m_Material->SetYoungsModulus(this->GetElasticity(m_CurrentLevel));
-    //FIXME - Use ImageToRectilinearFEMObjectFilter
-    //Generate2DRectilinearMesh1(m_Element,femObject,MeshOriginV,MeshSizeV,ElementsPerDim);
-    /***VAM - FIXME - Add Mesh generation to 2D ***/
-    mySolver->SetInput(m_FEMObject);
- //   std::cout << " init interpolation grid : im sz " << ImageSizeV << " MeshSize " << MeshSizeV << std::endl;
-    //FIXME
-    //mySolver->InitializeInterpolationGrid(ImageSizeV,MeshOriginV,MeshSizeV);
-    std::cout << " done initializing interpolation grid " << std::endl;
-    }
-  else if ( ImageDimension == 3 && dynamic_cast<Element3DC0LinearHexahedron*>(&*m_Element) != NULL)
-    {
-    m_Material->SetYoungsModulus( this->GetElasticity(m_CurrentLevel));
-    std::cout << " generating regular mesh " << std::endl;
-    //FIXME
-    //Generate3DRectilinearMesh1(m_Element,femObject,MeshOriginV,MeshSizeV,ElementsPerDim);
+
+    std::cout << " generating regular Quad mesh " << std::endl;
     typename ImageToMeshType::Pointer meshFilter = ImageToMeshType::New();
     meshFilter->SetInput( m_MovingImage );
     meshFilter->SetPixelsPerElement( pixPerElement );
@@ -776,12 +510,22 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
     meshFilter->Update();
     m_FEMObject = meshFilter->GetOutput();
     m_FEMObject->FinalizeMesh();
-    mySolver->SetInput(m_FEMObject);
     std::cout << " generating regular mesh done " << std::endl;
-    // the global to local transf is too slow so don't do it.
-//    std::cout << " DO NOT init interpolation grid : im sz " << ImageSizeV << " MeshSize " << MeshSizeV << std::endl;
-    //mySolver.InitializeInterpolationGrid(ImageSizeV,MeshOriginV,MeshSizeV);
-    //std::cout << " done initializing interpolation grid " << std::endl;
+    }
+  else if ( ImageDimension == 3 && dynamic_cast<Element3DC0LinearHexahedron*>(&*m_Element) != NULL)
+    {
+    m_Material->SetYoungsModulus( this->GetElasticity(m_CurrentLevel));
+    
+    std::cout << " generating regular Hex mesh " << std::endl;
+    typename ImageToMeshType::Pointer meshFilter = ImageToMeshType::New();
+    meshFilter->SetInput( m_MovingImage );
+    meshFilter->SetPixelsPerElement( pixPerElement );
+    meshFilter->SetElement( &*m_Element );
+    meshFilter->Update();
+    m_FEMObject = meshFilter->GetOutput();
+    m_FEMObject->FinalizeMesh();
+    std::cout << " generating regular mesh done " << std::endl;
+    
     }
   else
     {
@@ -790,6 +534,21 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
     e.SetLocation(ITK_LOCATION);
     throw e;
     }
+    
+  if ( m_UseLandmarks )
+  {
+    for (unsigned int i=0; i<m_LandmarkArray.size(); i++)
+    {
+      m_FEMObject->AddNextLoad( &*(m_LandmarkArray[i]) );
+    }
+  }
+  
+  mySolver->SetInput(m_FEMObject);
+  // the global to local transf is too slow so don't do it.
+  // std::cout << " DO NOT init interpolation grid : im sz " << ImageSizeV << " MeshSize " << MeshSizeV << std::endl;
+  // mySolver.InitializeInterpolationGrid(ImageSizeV,MeshOriginV,MeshSizeV);
+  // std::cout << " done initializing interpolation grid " << std::endl;
+    
 }
 
 
@@ -935,11 +694,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ApplyLoads(
           }
           
         m_LandmarkArray[lmind]->SetGlobalNumber(lmind);
-#ifdef USE_FEM_CLONE
-        LoadLandmark::Pointer l5 = dynamic_cast< LoadLandmark * >( &*m_LandmarkArray[lmind]->Clone() );
-#else
         LoadLandmark::Pointer l5 = dynamic_cast< LoadLandmark * >( &*m_LandmarkArray[lmind]->CreateAnother() );
-#endif
         m_FEMObject->AddNextLoad(&*l5);
         }
     itkDebugMacro( << " landmarks done" );
@@ -1057,20 +812,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
       {
       std::cout << " Big Error -- Field is NULL ";
       }
-    //   Assemble the master force vector (from the applied loads)
-    // if (iters == 1) // for testing
-
-//VAM - Moved to Solver
-#if 0
-    if( m_UseMassMatrix )
-      {
-      mySolver->AssembleFforTimeStep();
-      }
-    else
-      {
-      mySolver->AssembleF();
-      }
-#endif
+    mySolver->SetUseMassMatrix( m_UseMassMatrix );
 
     // Solve the system of equations for displacements (u=K^-1*F)
     mySolver->Modified();
@@ -1274,14 +1016,8 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::InterpolateVectorFie
 //  std::cout << " r s t steps " << rstep << " " << sstep << " "<< tstep << std::endl;
 
     Pos.set_size(ImageDimension);
-    // changes made - kiran
     int numElements = mySolver->GetInput()->GetNumberOfElements();
     for (int i=0; i<numElements; i++) 
-    //for(  Element::ArrayType::iterator elt=mySolver.el.begin(); elt != mySolver.el.end(); elt++)
-    // Element::ArrayType* elements = &(mySolver.GetElementArray());
-    //for(  Element::ArrayType::iterator elt = elements->begin();
-      //       elt != elements->end(); elt++)
-    // changes made - kiran
       {
       Element::Pointer eltp = mySolver->GetInput()->GetElement(i);
       for (double r=-1.0; r <= 1.0; r=r+rstep )
@@ -1530,23 +1266,12 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::EnforceDiffeomo
           itkDebugMacro( << " Target: " << m_LandmarkArray[lmind]->GetTarget() );
 
           // Convert the source to warped coords.
-          // changes made - kiran
- /*         m_LandmarkArray[lmind]->GetSource()=m_LandmarkArray[lmind]->GetSource()+
-            (dynamic_cast<LoadLandmark*>( &*mySolver.load.Find(lmind) )->GetForce() );*/
           m_LandmarkArray[lmind]->GetSource()=m_LandmarkArray[lmind]->GetSource()+
             (dynamic_cast<LoadLandmark*>( &*mySolver->GetOutput()->GetLoadWithGlobalNumber(lmind) )->GetForce() );
-          // changes made - kiran
           itkDebugMacro( << " New source: " << m_LandmarkArray[lmind]->GetSource() );
           itkDebugMacro( << " Target: " << m_LandmarkArray[lmind]->GetTarget() );
-#ifdef USE_FEM_CLONE
-          LoadLandmark::Pointer l5 = dynamic_cast< LoadLandmark * >( &*m_LandmarkArray[lmind]->Clone());
-#else
           LoadLandmark::Pointer l5 = dynamic_cast< LoadLandmark * >( &*m_LandmarkArray[lmind]->CreateAnother());
-#endif
-          // changes made - kiran
-          //mySolver.load.push_back(FEMP<Load>(l5));
           mySolver->GetOutput()->AddNextLoad(&*l5);
-		  // changes made - kiran
           }
           itkDebugMacro( << " warping landmarks done " );
         } 
@@ -1656,9 +1381,6 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::EnforceDiffeomo
         }
       // now do the same for the solver
       unsigned int ii;
-      // changes made - kiran
-      //Node::ArrayType* nodes = &(mySolver.node);
-      // changes made - kiran
       int numNodes = mySolver->GetOutput()->GetNumberOfNodes();
       for( int i=0; i<numNodes; i++)
         {
@@ -1813,10 +1535,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::SampleVectorFie
   // Here, we need to iterate through the nodes, get the nodal coordinates,
   // sample the VF at the node and place the values in the SolutionVector.
   unsigned int ii;
-  // changes made - kiran
-  // Node::ArrayType* nodes = &(mySolver.node);
   int numNodes = mySolver->GetOutput()->GetNumberOfNodes();
-  // changes made - kiran
   Element::VectorType coord;
   VectorType SolutionAtNode;
 
@@ -1957,8 +1676,16 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::MultiResSolve()
         SSS->SetDeltaT(m_TimeStep);
         SSS->SetRho(m_Rho[m_CurrentLevel]);
         SSS->SetAlpha(m_Alpha);
-			       
-        CreateMesh(MeshResolution,SSS,m_CurrentLevelImageSize);
+			  
+			  if ( m_CreateMeshFromImage )
+        {     
+          CreateMesh(MeshResolution,SSS,m_CurrentLevelImageSize);
+        }
+        else
+        {
+          m_FEMObject = GetInputFEMObject( m_CurrentLevel );
+        }
+        
         ApplyLoads(m_CurrentLevelImageSize,scaling);
         ApplyImageLoads(m_MovingPyramid->GetOutput(0),
                         m_FixedPyramid->GetOutput(0));
@@ -1983,19 +1710,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::MultiResSolve()
       itpackWrapper.JacobianConjugateGradient();
       itpackWrapper.SetMaximumNonZeroValuesInMatrix(nzelts);
       SSS->SetLinearSystemWrapper(&itpackWrapper);
-
-//VAM - Moved to Solver
-#if 0
-      if( m_UseMassMatrix )
-        {
-        SSS->AssembleKandM();
-        }
-      else
-        {
-        SSS->InitializeForSolution();
-        SSS->AssembleK();
-        }
-#endif
+      SSS->SetUseMassMatrix( m_UseMassMatrix );
       if (m_CurrentLevel > 0)
         {
         this->SampleVectorFieldAtNodes(SSS);

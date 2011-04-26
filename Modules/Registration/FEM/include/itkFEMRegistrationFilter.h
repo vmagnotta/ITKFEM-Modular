@@ -492,6 +492,16 @@ typedef  typename FieldType::Pointer FieldPointer;
   itkGetMacro(MaxLevel, unsigned int);
   
   /**
+   * Get/Set if the FEM Mesh should be created from the image or is
+   * provided by the user.
+   */
+  itkSetMacro(CreateMeshFromImage, bool);
+  void SetCreateMeshFromImageOn() { SetCreateMeshFromImage(true); };
+  void SetCreateMeshFromImageOff() { SetCreateMeshFromImage(false); };
+  itkGetMacro(CreateMeshFromImage, bool);
+  
+  
+  /**
    * FIXME - Poor variable Name
    */
   void      SetTemp(Float i) { m_Temp=i; }
@@ -614,6 +624,7 @@ private:
   bool         m_UseMultiResolution;
   bool         m_UseLandmarks;
   bool         m_UseMassMatrix;
+  bool         m_CreateMeshFromImage;
   unsigned int m_EmployRegridding;
   Sign         m_DescentDirection;
 
