@@ -57,7 +57,6 @@ FiniteDifferenceFunctionLoad<TMoving , TFixed>::CreateAnother(void) const
   copyPtr->m_NumberOfIntegrationPoints = this->m_NumberOfIntegrationPoints;
   copyPtr->m_SolutionIndex = this->m_SolutionIndex;
   copyPtr->m_SolutionIndex2 = this->m_SolutionIndex2;
-  copyPtr->m_Temp = this->m_Temp;
   copyPtr->m_Gamma = this->m_Gamma;
   copyPtr->m_Solution = this->m_Solution;
   copyPtr->m_GradSigma = this->m_GradSigma;

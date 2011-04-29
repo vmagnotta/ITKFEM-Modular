@@ -1,19 +1,20 @@
 /*=========================================================================
-
-  Program:   Insight Segmentation & Registration Toolkit
-  Module:    itkFEMRegistrationFilter.txx
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
-
-  Copyright (c) Insight Software Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+ *
+ *  Copyright Insight Software Consortium
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
 #ifndef __itkFEMRegistrationFilter_txx
 #define __itkFEMRegistrationFilter_txx
 
@@ -78,7 +79,6 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMRegistrationFilte
   m_Maxiters[m_CurrentLevel]=1;
   m_TimeStep=1;
   m_Alpha=1.0;
-  m_Temp=0.0;
   m_MeshPixelsPerElementAtEachResolution.set_size(1);
   m_NumberOfIntegrationPoints.set_size(1);
   m_NumberOfIntegrationPoints[m_CurrentLevel]=4;
@@ -88,17 +88,16 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMRegistrationFilte
   m_LineSearchMaximumIterations=100;
   m_UseMassMatrix=true;
 
-  m_NumLevels=1;
   m_MaxLevel=1;
-  m_MeshStep=2;
-  m_MeshLevels=1;
+  m_TotalIterations=0;
+  m_EmployRegridding = 1;
+  
   m_UseMultiResolution=false;
   m_UseLandmarks=false;
+  m_UseNormalizedGradient = false;
   m_MinJacobian=1.0;
-
-  m_TotalIterations=0;
-
-
+  
+  
   for (unsigned int i=0; i < ImageDimension; i++)
     {
     m_ImageScaling[i]=1;
@@ -106,26 +105,19 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::FEMRegistrationFilte
     m_FullImageSize[i]=0;
     m_ImageOrigin[i]=0;
     }
+    
   m_FloatImage=NULL;
   m_Field=NULL;
   m_TotalField=NULL;
   m_WarpedImage=NULL;
-  
-  // Setup the default interpolator
-  typename DefaultInterpolatorType::Pointer interp =
-    DefaultInterpolatorType::New();
-
-  m_Interpolator =
-    static_cast<InterpolatorType*>( interp.GetPointer() );
-  m_Interpolator->SetInputImage(m_Field);
-
   m_Load = 0;
-  
-  m_EmployRegridding = 1;
-  
   m_FEMObject = NULL;
   m_CreateMeshFromImage = true;
-
+  
+  // Setup the default interpolator
+  typename DefaultInterpolatorType::Pointer interp = DefaultInterpolatorType::New();
+  m_Interpolator = static_cast<InterpolatorType*>( interp.GetPointer() );
+  m_Interpolator->SetInputImage(m_Field);
 }
 
 template<class TMovingImage,class TFixedImage,class TFemObject>
@@ -238,89 +230,12 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::GetInputFEMObject(un
 template<class TMovingImage,class TFixedImage,class TFemObject>
 void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ChooseMetric(unsigned int which)
 {
-  // Choose the similarity metric
-
-
-// for using the imagetoimagemetricloads
-#ifdef  USEIMAGEMETRIC
-  typedef itk::MeanSquaresImageToImageMetric<FixedImageType,MovingImageType> MetricType0;
-  typedef itk::NormalizedCorrelationImageToImageMetric<FixedImageType,MovingImageType> MetricType1;
-  typedef itk::PatternIntensityImageToImageMetric<FixedImageType,MovingImageType> MetricType2;
-  typedef itk::MutualInformationImageToImageMetric<FixedImageType,MovingImageType> MetricType3;
-  typedef itk::MattesMutualInformationImageToImageMetric<FixedImageType,MovingImageType> MetricType4;
-//  typedef itk::DemonsImageToImageMetric<FixedImageType,MovingImageType> MetricType5;
-
-  typedef itk::MeanSquaresImageToImageMetric<FixedImageType,MovingImageType> MetricType5;
-
-  float m_Temp=1.0;
-
-  MetricType3::Pointer m=MetricType3::New();
-  MetricType4::Pointer ma=MetricType4::New();
-
-  unsigned int whichmetric=(unsigned int) which;
-
-  m_WhichMetric=which;
-  unsigned int nsp=1;
-  for (int i=0; i<ImageDimension; i++)
-    {
-    nsp *= m_MetricWidth[m_CurrentLevel];
-    }
-  if (which == 3 )
-    {
-    m->SetNumberOfSpatialSamples(nsp/2);
-    m->SetFixedImageStandardDeviation(0.4);
-    m->SetMovingImageStandardDeviation(0.4);
-    }
-  else if (which == 4 )
-    {
-    ma->SetNumberOfHistogramBins( 10 );
-    ma->SetNumberOfSpatialSamples( nsp/2 );
-    }
-
-  switch (which)
-    {
-    case 0:
-      m_Metric=MetricType0::New();
-      m_Metric->SetScaleGradient(m_Temp); // this is the default(?)
-      //p=MetricType0::New();
-      //m_Function->SetInverseMetric(p);
-      break;
-    case 1:
-      m_Metric=MetricType1::New();
-      m_Metric->SetScaleGradient(m_Temp);
-      break;
-    case 2:
-      m_Metric=MetricType2::New();
-      m_Metric->SetScaleGradient(m_Temp);
-      break;
-    case 3:
-      m_Metric=m;
-      m_Metric->SetScaleGradient(m_Temp);
-      break;
-    case 4:
-      m_Metric=ma;
-      m_Metric->SetScaleGradient(m_Temp);
-      break;
-    case 5:
-      m_Metric=MetricType5::New();
-      m_Metric->SetScaleGradient(m_Temp);
-      break;
-    default:
-      m_Metric=MetricType0::New();
-      m_Metric->SetScaleGradient(m_Temp);
-
-    }
-#else
+  // Choose the similarity Function
 
   typedef itk::MeanSquareRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType0;
   typedef itk::NCCRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType1;
-  typedef itk::NCCRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType2;
-  typedef itk::MIRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType3;
-  typedef itk::MIRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType4;
-  typedef itk::DemonsRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType5;
-
-  typename MetricType3::Pointer m=MetricType3::New();
-  typename MetricType4::Pointer ma=MetricType4::New();
+  typedef itk::MIRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType2;
+  typedef itk::DemonsRegistrationFunction<FixedImageType,MovingImageType,FieldType> MetricType3;
 
   m_WhichMetric=(unsigned int)which;
 
@@ -336,13 +251,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ChooseMetric(un
       m_Metric=MetricType2::New();
       break;
     case 3:
-      m_Metric=m;
-      break;
-    case 4:
-      m_Metric=ma;
-      break;
-    case 5:
-      m_Metric=MetricType5::New();
+      m_Metric=MetricType3::New();
       break;
     default:
       m_Metric=MetricType0::New();
@@ -350,9 +259,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ChooseMetric(un
 
 
   m_Metric->SetGradientStep( m_Gamma[m_CurrentLevel] );
-  if ( m_Temp == 1.0 ) m_Metric->SetNormalizeGradient(true);
-  else m_Metric->SetNormalizeGradient(false);
-#endif
+  m_Metric->SetNormalizeGradient( m_UseNormalizedGradient );
 }
 
 
@@ -361,7 +268,7 @@ int FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::WriteDisplacemen
 // Outputs the displacement field as a multicomponent image  XYZXYZXYZ...
 {
 
-  std::cout << "Writing multi-component displacement vector field...";
+  itkDebugMacro( << "Writing multi-component displacement vector field...");
 
   typedef itk::ImageFileWriter< FieldType >  FieldWriterType;
   typename FieldWriterType::Pointer  fieldWriter = FieldWriterType::New();
@@ -378,7 +285,7 @@ int FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::WriteDisplacemen
     std::cerr << excp << std::endl;
     }
 
-  std::cout << "done" << std::endl;
+  itkDebugMacro( << "done" << std::endl);
   return 0;
 }
 
@@ -414,9 +321,8 @@ template<class TMovingImage,class TFixedImage,class TFemObject>
 void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::WarpImage( const MovingImageType * ImageToWarp)
 {
   // -------------------------------------------------------
-  std::cout << "Warping image" << std::endl;
+  itkDebugMacro( << "Warping image" << std::endl);
 
-  {
   typename WarperType::Pointer warper = WarperType::New();
 
   typedef typename WarperType::CoordRepType WarperCoordRepType;
@@ -440,8 +346,6 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::WarpImage( cons
   warper->Update();
 
   m_WarpedImage=warper->GetOutput();
-  }
-
 }
 
 
@@ -502,7 +406,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
     {
     m_Material->SetYoungsModulus(this->GetElasticity(m_CurrentLevel));
 
-    std::cout << " generating regular Quad mesh " << std::endl;
+    itkDebugMacro( << " generating regular Quad mesh " << std::endl );
     typename ImageToMeshType::Pointer meshFilter = ImageToMeshType::New();
     meshFilter->SetInput( m_MovingImage );
     meshFilter->SetPixelsPerElement( pixPerElement );
@@ -510,13 +414,13 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
     meshFilter->Update();
     m_FEMObject = meshFilter->GetOutput();
     m_FEMObject->FinalizeMesh();
-    std::cout << " generating regular mesh done " << std::endl;
+    itkDebugMacro( << " generating regular mesh done " << std::endl );
     }
   else if ( ImageDimension == 3 && dynamic_cast<Element3DC0LinearHexahedron*>(&*m_Element) != NULL)
     {
     m_Material->SetYoungsModulus( this->GetElasticity(m_CurrentLevel));
     
-    std::cout << " generating regular Hex mesh " << std::endl;
+    itkDebugMacro( << " generating regular Hex mesh " << std::endl );
     typename ImageToMeshType::Pointer meshFilter = ImageToMeshType::New();
     meshFilter->SetInput( m_MovingImage );
     meshFilter->SetPixelsPerElement( pixPerElement );
@@ -524,8 +428,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::CreateMesh(doub
     meshFilter->Update();
     m_FEMObject = meshFilter->GetOutput();
     m_FEMObject->FinalizeMesh();
-    std::cout << " generating regular mesh done " << std::endl;
-    
+    itkDebugMacro( << " generating regular mesh done " << std::endl );
     }
   else
     {
@@ -560,12 +463,9 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>
   m_Load->SetMovingImage(movingimg);
   m_Load->SetFixedImage(fixedimg);
   if (!m_Field) this->InitializeField();
-#ifndef USEIMAGEMETRIC
   m_Load->SetDeformationField(this->GetDeformationField());
-#endif
   m_Load->SetMetric(m_Metric);
   m_Load->InitializeMetric();
-  m_Load->SetTemp(m_Temp);
   m_Load->SetGamma(m_Gamma[m_CurrentLevel]);
   ImageSizeType r;
   for (unsigned int dd = 0; dd < ImageDimension; dd++)
@@ -574,7 +474,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>
     }
   m_Load->SetMetricRadius(r);
   m_Load->SetNumberOfIntegrationPoints(m_NumberOfIntegrationPoints[m_CurrentLevel]);
-  m_Load->SetGlobalNumber(m_FEMObject->GetNumberOfLoads()+1); //NOTE SETTING GN FOR FIND LATER
+  m_Load->SetGlobalNumber(m_FEMObject->GetNumberOfLoads()+1); 
   m_Load->SetSign((Float)m_DescentDirection);
   m_FEMObject->AddNextLoad(&*m_Load);
   m_Load = dynamic_cast<typename FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ImageMetricLoadType*>
@@ -790,7 +690,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
 {
   if (!m_Load)
     {
-    std::cout << " m_Load not initialized " << std::endl;
+    itkDebugMacro( << " m_Load not initialized " << std::endl );
     return;
     }
 
@@ -810,7 +710,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
 
     if (!m_Field)
       {
-      std::cout << " Big Error -- Field is NULL ";
+      itkDebugMacro( << " Big Error -- Field is NULL ");
       }
     mySolver->SetUseMassMatrix( m_UseMassMatrix );
 
@@ -819,7 +719,6 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
     mySolver->Update();
     m_Load->PrintCurrentEnergy();
 
-#ifndef USEIMAGEMETRIC
     if (m_DescentDirection == 1)
       {
       deltE=(LastE - m_Load->GetCurrentEnergy());
@@ -828,31 +727,21 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
       {
       deltE=(m_Load->GetCurrentEnergy() - LastE );
       }
-#else
-    if (m_DescentDirection == 1)
-      {
-      deltE=(m_Load->GetCurrentEnergy() - LastE );
-      }
-    else
-      {
-      deltE=(LastE - m_Load->GetCurrentEnergy());
-      }
-#endif
 
     if (  DLS==2 && deltE < 0.0 )
       {
-      std::cout << " line search ";
+      itkDebugMacro( << " line search ");
       const float tol = 1.0;//((0.01  < LastE) ? 0.01 : LastE/10.);
       LastE=this->GoldenSection(mySolver,tol,m_LineSearchMaximumIterations);
       deltE=(m_MinE-LastE);
-      std::cout << " line search done " << std::endl;
+      itkDebugMacro( << " line search done " << std::endl );
       }
 
     iters++;
 
     if (deltE == 0.0)
       {
-      std::cout << " no change in energy " << std::endl;
+      itkDebugMacro( << " no change in energy " << std::endl);
       Done=true;
       }
     if ( (DLS == 0)  && (  iters >= m_Maxiters[m_CurrentLevel] ) )
@@ -899,7 +788,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::IterativeSolve(
     //WarpImage(m_MovingImage);
     //WriteWarpedImage(m_ResultsFileName.c_str());
     //}
-    std::cout << " min E " << m_MinE <<  " delt E " << deltE <<  " iter " << iters << std::endl;
+    itkDebugMacro( << " min E " << m_MinE <<  " delt E " << deltE <<  " iter " << iters << std::endl);
     m_TotalIterations++;
     }
 }
@@ -948,7 +837,7 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::InterpolateVectorFie
     }
   m_FieldSize=field->GetLargestPossibleRegion().GetSize();
 
-  std::cout << " interpolating vector field of size " << m_FieldSize;
+  itkDebugMacro( << " interpolating vector field of size " << m_FieldSize);
 
   Float rstep,sstep,tstep;
 
@@ -1083,7 +972,7 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::InterpolateVectorFie
     }/* */ // end if imagedimension==3
 
   // Insure that the values are exact at the nodes. They won't necessarily be unless we use this code.
-  std::cout << " interpolation done " << std::endl;
+  itkDebugMacro( << " interpolation done " << std::endl);
 }
 
 template<class TMovingImage,class TFixedImage,class TFemObject>
@@ -1104,7 +993,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ComputeJacobian
 
   if ( !m_FloatImage && jproduct)
     {
-    std::cout << " allocating m_FloatImage " << std::endl;
+    itkDebugMacro( << " allocating m_FloatImage " << std::endl);
     m_FloatImage = FloatImageType::New();
     m_FloatImage->SetLargestPossibleRegion( field->GetLargestPossibleRegion() );
     m_FloatImage->SetBufferedRegion( field->GetLargestPossibleRegion().GetSize() );
@@ -1194,7 +1083,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ComputeJacobian
       if (det < m_MinJacobian) m_MinJacobian=det;
       }
     }
-  std::cout << " min Jacobian " << m_MinJacobian << std::endl;
+  itkDebugMacro( << " min Jacobian " << m_MinJacobian << std::endl);
 
   if (jproduct && m_FloatImage && smooth > 0)
     {
@@ -1506,15 +1395,15 @@ FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::ExpandVectorField( E
   // re-size the vector field
   if (!field) field=m_Field;
 
-  std::cout << " input field size " << m_Field->GetLargestPossibleRegion().GetSize()
-            << " expand factors ";
+  itkDebugMacro( << " input field size " << m_Field->GetLargestPossibleRegion().GetSize());
+  itkDebugMacro( << " expand factors ");
   VectorType pad;
   for (unsigned int i=0; i< ImageDimension; i++)
     {
     pad[i]=0.0;
-    std::cout << expandFactors[i] << " ";
+    itkDebugMacro( << expandFactors[i] << " ");
     }
-  std::cout << std::endl;
+  itkDebugMacro( << std::endl);
   typename ExpanderType::Pointer m_FieldExpander = ExpanderType::New();
   m_FieldExpander->SetInput(field);
   m_FieldExpander->SetExpandFactors( expandFactors );
@@ -1589,7 +1478,10 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::PrintVectorFiel
   while( !fieldIter.IsAtEnd()  )
     {
     VectorType disp=fieldIter.Get();
-    if ((ct % modnum) == 0)  std::cout << " field pix " << fieldIter.Get() << std::endl;
+    if ((ct % modnum) == 0)  
+    {
+      itkDebugMacro( << " field pix " << fieldIter.Get() << std::endl);
+    }
     for (unsigned int i=0; i<ImageDimension;i++)
       {
       if (vcl_fabs(disp[i]) > max )
@@ -1601,7 +1493,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::PrintVectorFiel
     ct++;
 
     }
-  std::cout << " max  vec " << max << std::endl;
+  itkDebugMacro( << " max  vec " << max << std::endl );
 }
 
 template<class TMovingImage,class TFixedImage,class TFemObject>
@@ -1615,7 +1507,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::MultiResSolve()
 
   for (m_CurrentLevel=0; m_CurrentLevel<m_MaxLevel; m_CurrentLevel++)
     {
-    std::cout << " beginning level " << m_CurrentLevel << std::endl;
+    itkDebugMacro( << " beginning level " << m_CurrentLevel << std::endl );
     
     //   Setup a multi-resolution pyramid
     typedef SolverCrankNicolson<3>   TestSolverType;
@@ -1669,7 +1561,7 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::MultiResSolve()
           m_CurrentImageScaling[d]=SizeReductionMoving[0][d];
           if (m_CurrentLevel == 0) scaling[d]=(double)SizeReductionMoving[0][d];
           else scaling[d]=(double) lastLevelSize[d]/(double) m_CurrentLevelImageSize[d];
-          std::cout << " scaling " << scaling[d] << std::endl;
+          itkDebugMacro( << " scaling " << scaling[d] << std::endl);
         }
         double MeshResolution=(double)this->m_MeshPixelsPerElementAtEachResolution(m_CurrentLevel);
 
@@ -1740,15 +1632,15 @@ void FEMRegistrationFilter<TMovingImage,TFixedImage,TFemObject>::MultiResSolve()
 
       }
 
-    std::cout << " end level " << m_CurrentLevel;
+    itkDebugMacro( << " end level " << m_CurrentLevel );
 
 
     }// end image resolution loop
 
   if (m_TotalField)
     {
-    std::cout << " copy field " <<  m_TotalField->GetLargestPossibleRegion().GetSize()
-              << " to " <<  m_Field->GetLargestPossibleRegion().GetSize() << std::endl;
+    itkDebugMacro( << " copy field " <<  m_TotalField->GetLargestPossibleRegion().GetSize());
+    itkDebugMacro( << " to " <<  m_Field->GetLargestPossibleRegion().GetSize() << std::endl);
     FieldIterator fieldIter( m_TotalField, m_TotalField->GetLargestPossibleRegion() );
     fieldIter.GoToBegin();
     for(; !fieldIter.IsAtEnd(); ++fieldIter )

@@ -1,19 +1,20 @@
 /*=========================================================================
-
-  Program:   Insight Segmentation & Registration Toolkit
-  Module:    itkFEMRegistrationFilterTest.cxx
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
-
-  Copyright (c) Insight Software Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+ *
+ *  Copyright Insight Software Consortium
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
 
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
@@ -28,18 +29,13 @@
 #include "itkFEMObject.h"
 #include "vnl/vnl_math.h"
 
-// tyepdefs necessary for FEM visitor dispatcher
-  
-  typedef unsigned char PixelType;
-  typedef itk::Image<PixelType,3> testImageType;  
-  typedef itk::fem::Element3DC0LinearHexahedronMembrane   ElementType;
-//  typedef itk::fem::Element2DC0LinearQuadrilateralMembrane   ElementType;
 
-//#ifdef  USEIMAGEMETRIC 
-  typedef itk::fem::ImageMetricLoad<testImageType,testImageType>     ImageLoadType2;
-//#else
-  typedef itk::fem::FiniteDifferenceFunctionLoad<testImageType,testImageType>     ImageLoadType;
-//#endif 
+
+// tyepdefs used for registration
+typedef unsigned char PixelType;
+typedef itk::Image<PixelType,3> testImageType;  
+typedef itk::fem::Element3DC0LinearHexahedronMembrane   ElementType;
+
 
 
 
@@ -178,7 +174,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
   //-------------------------------------------------------------
   std::cout << "Run registration and warp moving" << std::endl;
   
-  for (int met=0; met<6; met++)
+  for (int met=0; met<4; met++)
     {
     typedef itk::fem::FEMObject<3> FEMObjectType;
     typedef itk::fem::FEMRegistrationFilter<testImageType,testImageType, FEMObjectType> RegistrationType;
@@ -187,16 +183,16 @@ int itkFEMRegistrationFilterTest(int, char* [] )
     registrator->SetMovingImage( moving );
   
     registrator->SetUseMultiResolution(true);
-    registrator->SetNumLevels(1);
     registrator->SetMaxLevel(1); 
     registrator->SetMovingImage( moving );
     registrator->SetFixedImage( fixed );
-//  registrator->SetTemp(1.0);
+    registrator->SetUseNormalizedGradient( true );
     registrator->ChooseMetric((float)met);
+    
     unsigned int maxiters=5;  
     float e=1.e6;
     float p=1.e5;
-//  std::cout << " input num iters, e, p: ";  std::cin >> maxiters >> e >> p;
+
     registrator->SetElasticity(e,0);
     registrator->SetRho(p,0);
     registrator->SetGamma(1.,0);
@@ -204,7 +200,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
     registrator->SetMaximumIterations( maxiters,0 );
     registrator->SetMeshPixelsPerElementAtEachResolution(4,0);
     registrator->SetWidthOfMetricRegion(0 ,0);
-    if ( met == 0 || met == 5) 
+    if ( met == 0 || met == 3) 
       registrator->SetWidthOfMetricRegion(0 ,0);
     else 
       registrator->SetWidthOfMetricRegion(1 ,0);
@@ -223,7 +219,7 @@ int itkFEMRegistrationFilterTest(int, char* [] )
       registrator->SetDoLineSearchOnImageEnergy((int)0);
       registrator->SetEmployRegridding(false);
       }
-    registrator->UseLandmarks(false);
+    registrator->SetUseLandmarks(false);
   
     itk::fem::MaterialLinearElasticity::Pointer m;
     m=itk::fem::MaterialLinearElasticity::New();

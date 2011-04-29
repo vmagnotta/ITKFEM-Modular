@@ -1,29 +1,28 @@
 /*=========================================================================
-
-  Program:   Insight Segmentation & Registration Toolkit
-  Module:    itkFEMRegistrationFilter.h
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
-
-  Copyright (c) Insight Software Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+ *
+ *  Copyright Insight Software Consortium
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
 
 #ifndef __itkFEMRegistrationFilter_h
 #define __itkFEMRegistrationFilter_h
 
 #include "itkFEMLinearSystemWrapperItpack.h"
 #include "itkFEMLinearSystemWrapperDenseVNL.h"
-//#include "itkFEMGenerateMesh.h"
 #include "itkFEMObject.h"
 #include "itkFEMSolverCrankNicolson.h"
-//#include "itkFEMSolverCrankNicolson1.h"
 #include "itkFEMMaterialLinearElasticity.h"
 #include "itkFEMImageMetricLoad.h"
 #include "itkFEMFiniteDifferenceFunctionLoad.h"
@@ -176,12 +175,7 @@ public:
 
   typedef itk::fem::ImageToRectilinearFEMObjectFilter<TMovingImage> ImageToMeshType;
 
-  /** Set the interpolator function. */
-  itkSetObjectMacro( Interpolator, InterpolatorType );
-
-  /** Get a pointer to the interpolator function. */
-  itkGetObjectMacro( Interpolator, InterpolatorType );
-
+  
 
   typedef itk::VectorExpandImageFilter<FieldType,FieldType> ExpanderType;
   typedef typename ExpanderType::ExpandFactorsType          ExpandFactorsType;
@@ -189,19 +183,14 @@ public:
   typedef itk::RecursiveMultiResolutionPyramidImageFilter<FixedImageType,FixedImageType>
     FixedPyramidType;
 
-typedef  typename FieldType::Pointer FieldPointer;
+  typedef  typename FieldType::Pointer FieldPointer;
 
-/** Instantiate the load class with the correct image type. */
-//#define USEIMAGEMETRIC
-#ifdef  USEIMAGEMETRIC
-  typedef ImageToImageMetric<ImageType,FixedImageType>   MetricBaseType;
-  typedef  ImageMetricLoad<ImageType,ImageType>          ImageMetricLoadType;
-#else
+  /** Instantiate the load class with the correct image type. */
   typedef FiniteDifferenceFunctionLoad<MovingImageType,FixedImageType>
                                                          ImageMetricLoadType;
   typedef PDEDeformableRegistrationFunction<FixedImageType,MovingImageType,FieldType>
                                                          MetricBaseType;
-#endif
+
   typedef typename MetricBaseType::Pointer          MetricBaseTypePointer;
   
   
@@ -215,14 +204,14 @@ typedef  typename FieldType::Pointer FieldPointer;
    * current resolution in a multi-resolution
    * registration 
    */
-  MovingImageType* GetMovingImage(){return m_MovingImage;}
+  MovingImageType* GetMovingImage() {return m_MovingImage;}
   
   /** Get the original full resolution moving image. */
   MovingImageType* GetOriginalMovingImage(){return m_OriginalMovingImage;}
   
   /** Get/Set the target (fixed) image. */
   void SetFixedImage(FixedImageType* T);
-  FixedImageType* GetFixedImage(){return m_FixedImage;}
+  FixedImageType* GetFixedImage() {return m_FixedImage;}
   
   /** 
    * Get/Set the finite element mesh for the registration. A seperate
@@ -257,10 +246,7 @@ typedef  typename FieldType::Pointer FieldPointer;
   FloatImageType* GetJacobianImage(){return m_FloatImage;}
   
 
-  /** 
-   * Outputs the FE deformation field interpolated over the entire
-   * image domain. 
-   */
+  /** Outputs the FE deformation field interpolated over the entire image domain. */
   FieldType* GetDeformationField(){return m_Field;}
   
   
@@ -271,7 +257,6 @@ typedef  typename FieldType::Pointer FieldPointer;
     m_Field=F;
     }
 
-  //FIXME
   /** Add a way to include landmarks ***/
   void AddLandmark(PointType source, PointType target);
   void InsertLandmark(unsigned int i, PointType source, PointType target);
@@ -279,12 +264,6 @@ typedef  typename FieldType::Pointer FieldPointer;
   void ClearLandmarks();
   void GetLandmark(unsigned int i, PointType& source, PointType& target);
   
-
-  /** This determines if the landmark points will be used in the FEM Formulation */
-  void UseLandmarks(bool b)
-    {
-    m_UseLandmarks=b;
-    }
 
   /** We check the jacobian of the current deformation field. 
     *  If it is < threshold, we begin diffeomorphism enforcement:
@@ -358,7 +337,9 @@ typedef  typename FieldType::Pointer FieldPointer;
    */
   itkSetMacro(UseLandmarks, bool);
   itkGetMacro(UseLandmarks, bool);
-
+  void SetUseLandmarksOff() {SetUseLandmarks(false);}
+  void SetUseLandmarksOn() {SetUseLandmarks(true);}
+  
   /** 
    * Get/Set Use of the mass matrix. This should be true.
    */
@@ -425,7 +406,15 @@ typedef  typename FieldType::Pointer FieldPointer;
   void SetUseMultiResolutionOff() {SetUseMultiResolution(false);}
   void SetUseMultiResolutionOn() {SetUseMultiResolution(true);}
   
-
+  /** 
+   * Get/Set the use of normalized gradient values in the image
+   * metric during registration
+   */ 
+  itkSetMacro(UseNormalizedGradient, bool);
+  itkGetMacro(UseNormalizedGradient, bool);
+  void SetUseNormalizedGradientOff() {SetUseNormalizedGradient(false);}
+  void SetUseNormalizedGradientOn() {SetUseNormalizedGradient(true);}
+  
   /** 
    * Get/Set the number of iterations before regridding is employed.
    */
@@ -458,11 +447,10 @@ typedef  typename FieldType::Pointer FieldPointer;
    * The options are: 
    *     0=mean squares
    *     1=cross correlation
-   *     2=pattern intensity
-   *     3=mutual information
-   *     4=Mattes mutual information
+   *     2=mutual information
+   *     3=Demons
    */
-  void      ChooseMetric( unsigned int whichmetric); 
+  void ChooseMetric( unsigned int whichmetric); 
   
   /**
    * Return the type of image metric used for the registration
@@ -470,20 +458,14 @@ typedef  typename FieldType::Pointer FieldPointer;
   unsigned int GetMetricType() {return m_WhichMetric;}
   
   /** This function allows one to set the element and its material externally. */
-  void      SetElement(Element::Pointer e) {m_Element=e;}
+  void SetElement(Element::Pointer e) {m_Element=e;}
 
   /** This sets the pointer to the material. */
-  void      SetMaterial(MaterialType::Pointer m) {m_Material=m;}
+  void SetMaterial(MaterialType::Pointer m) {m_Material=m;}
 
   /** Print vector field for debugging */
-  void      PrintVectorField(unsigned int modnum=1000);
+  void PrintVectorField(unsigned int modnum=1000);
 
-  //FIXME - Next two variables should be merged
-  /**
-   * Get/Set the number of levels for multi resolution
-   */
-  itkSetClampMacro(NumLevels, unsigned int, 0, NumericTraits<unsigned int>::max());
-  itkGetMacro(NumLevels, unsigned int);
   
   /**
    * Get/Set the maximum number of levels for multi resolution
@@ -501,10 +483,12 @@ typedef  typename FieldType::Pointer FieldPointer;
   itkGetMacro(CreateMeshFromImage, bool);
   
   
-  /**
-   * FIXME - Poor variable Name
-   */
-  void      SetTemp(Float i) { m_Temp=i; }
+  /** Set the interpolator function. */
+  itkSetObjectMacro( Interpolator, InterpolatorType );
+
+  /** Get a pointer to the interpolator function. */
+  itkGetObjectMacro( Interpolator, InterpolatorType );
+
 
   /** de/constructor */
   FEMRegistrationFilter( ); 
@@ -590,20 +574,22 @@ private:
   unsigned int     m_DoLineSearchOnImageEnergy; 
   unsigned int     m_LineSearchMaximumIterations;
 
+  /* Parameters used to define Multi-resolution Registration */
   vnl_vector<unsigned int>     m_NumberOfIntegrationPoints;// resolution of integration
-  vnl_vector<unsigned int>     m_MetricWidth;
-  vnl_vector<unsigned int>     m_Maxiters; // max iterations
-  unsigned int                 m_TotalIterations;
-  unsigned int                 m_NumLevels; // Number of Resolution Levels
-  unsigned int                 m_MaxLevel;  // Maximum Level (NumLevels is original resolution).
-  unsigned int                 m_MeshLevels;// Number of Mesh Resolutions ( should be >= 1)
-  unsigned int                 m_MeshStep;  // Ratio Between Mesh Resolutions ( currently set to 2, should be >= 1)
+  vnl_vector<unsigned int>     m_MetricWidth; // number of iterations at each level
+  vnl_vector<unsigned int>     m_Maxiters;   // max iterations
+  unsigned int                 m_TotalIterations; // total number of iterations that were run
+  unsigned int                 m_MaxLevel;  // Number of Resolution Levels for registration.
   unsigned int                 m_FileCount; // keeps track of number of files written
-  unsigned int                 m_CurrentLevel;
+  unsigned int                 m_CurrentLevel; // current resolution level
 
   typename FixedImageType::SizeType     m_CurrentLevelImageSize; 
 
-  unsigned int     m_WhichMetric;
+  unsigned int                 m_WhichMetric; // Metric used for image registration
+                                              // 0 = Mean Squares
+                                              // 1 = Normalized Correlation
+                                              // 2 = Mutual Information
+                                              // 3 = Demons Metric
  
   /** Stores the number of  pixels per element  of the mesh for each
       resolution of the multi-resolution pyramid */
@@ -617,31 +603,31 @@ private:
   Float                 m_MinE;        // minimum recorded energy
   Float                 m_MinJacobian; // minimum recorded energy
   Float                 m_Alpha;       // difference parameter 
-  /** Factor we want to reduce the energy by - determines convergence. */
-  Float     m_EnergyReductionFactor; 
-  Float     m_Temp;
-
-  bool         m_UseMultiResolution;
-  bool         m_UseLandmarks;
-  bool         m_UseMassMatrix;
-  bool         m_CreateMeshFromImage;
-  unsigned int m_EmployRegridding;
-  Sign         m_DescentDirection;
-
-  ImageSizeType     m_FullImageSize;    // image size
-  ImageSizeType     m_ImageOrigin;      // image size
+  
+  bool                  m_UseMultiResolution; // Use multi-resolution registration
+  bool                  m_UseLandmarks;       // Use landmark points
+  bool                  m_UseMassMatrix;      // Use Mass matrix in FEM solution
+  bool                  m_UseNormalizedGradient; // Use normalized gradient magnitude in the metric
+  bool                  m_CreateMeshFromImage;// Create the mesh based on the fixed image
+  unsigned int          m_EmployRegridding;   // Use regridding 
+  Sign                  m_DescentDirection;   // Metric minimizes or maximizes
+  Float                 m_EnergyReductionFactor; // Factor we want to reduce the energy - Helps with convergence
+  ImageSizeType         m_FullImageSize;      // image size
+  ImageSizeType         m_ImageOrigin;        // image origin
+  
   /** Gives the ratio of original image size to current image size - for dealing with multi-res.*/
   ImageSizeType                    m_ImageScaling; 
   ImageSizeType                    m_CurrentImageScaling; 
   typename FieldType::RegionType   m_FieldRegion;
   typename FieldType::SizeType     m_FieldSize;
   typename FieldType::Pointer      m_Field;
+  
   // only use TotalField if re-gridding is employed.
   typename FieldType::Pointer               m_TotalField;
   typename ImageMetricLoadType::Pointer     m_Load; // Defines the load to use
    
   // define the warper
-  typename WarperType::Pointer m_Warper; 
+  typename WarperType::Pointer          m_Warper; 
 
   // declare a new image to hold the warped  reference
   typename FixedImageType::Pointer      m_WarpedImage;
