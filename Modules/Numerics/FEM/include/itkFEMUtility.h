@@ -21,6 +21,8 @@
 #include <string>
 #include <iostream>
 
+class MetaObject;
+
 namespace itk
 {
 namespace fem

@@ -29,10 +29,10 @@ public:
   typedef SpatialObject<2> SpatialObject2D;
   typedef SpatialObject<3> SpatialObject3D;
   typedef MetaObject * (*MetaObjectConversionFunction)(void *);
-  typedef std::map<const std::string,MetaObjectConversionFunction *> MapType;
+  typedef std::map<const std::string,MetaObjectConversionFunction> MapType;
   static MetaObject *Convert(SpatialObject2D *);
   static MetaObject *Convert(SpatialObject3D *);
-  static void RegisterConverter(const char *className,MetaObjectConversionFunction *converter);
+  static void RegisterConverter(const char *className,MetaObjectConversionFunction converter);
 private:
   static MapType m_ConverterMap;
 };

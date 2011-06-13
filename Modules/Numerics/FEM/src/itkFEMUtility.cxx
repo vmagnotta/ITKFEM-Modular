@@ -18,7 +18,8 @@
 
 #include "itkFEMUtility.h"
 #include "itkMetaObjectConverterFactory.h"
-#include "itkMacro"
+#include "itkmetaFEMObjectConverter.h"
+#include "itkMacro.h"
 #include "metaObject.h"
 #include "metaFEMObject.h"
 #include "itkFEMObjectSpatialObject.h"
@@ -172,19 +173,18 @@ MetaObject *InternalConvertFEMMetaObject(void *objToConvert)
 
   typedef itk::FEMObjectSpatialObject<NDimension> FEMSOType;
   FEMSOType * femSO = dynamic_cast<FEMSOType *>(so);
-  if(fmeSO != 0)
+  if(femSO != 0)
     {
     typedef itk::fem::FEMObject<NDimension> FEMObjectType;
 
     MetaFEMObjectConverter<NDimension> converter;
     MetaFEMObject            *fem =
-      converter.FEMObjectSpatialObjectToMetaFEMObject(fmeSO);
-    if(objToConvert->GetParent())
+      converter.FEMObjectSpatialObjectToMetaFEMObject(femSO);
+    if(so->GetParent())
       {
-      fem->ParentID(objToConvert->GetParent()->GetId());
+      fem->ParentID(so->GetParent()->GetId());
       }
-    fem->Name(objToConvert->GetProperty()->GetName().c_str());
-    this->SetTransform(fem, objToConvert->GetObjectToParentTransform());
+    fem->Name(so->GetProperty()->GetName().c_str());
     return fem;
     }
   return 0;

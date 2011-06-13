@@ -290,8 +290,4 @@ itk_add_test(NAME itkImageToRectilinearFEMObjectFilter3DTest ${FEM_TESTS3}
          ${ITK_DATA_ROOT}/Input/HeadMRVolumeWithDirection.mhd
          10 10 10 4 6 4 175 96 3 0 0 0 0 10 24 41.5692 0 33 122.497 100.172 0 3 0 0 1 6 5 35 36 41 40 10 12 13 18 17 47 48 53 52 33 46 47 52 51 81 82 87 86)
 
-
-
-
-
 endif(0)

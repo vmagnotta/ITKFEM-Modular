@@ -580,6 +580,7 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
     else
       {
       MetaObject *mObject = MetaObjectConverterFactory::Convert((*it).GetPointer());
+      this->SetTransform(mObject,(*it)->GetObjectToParentTransform());
       metaScene->AddObject(mObject);
       }
 #ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE

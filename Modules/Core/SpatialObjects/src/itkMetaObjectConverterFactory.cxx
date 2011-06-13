@@ -38,7 +38,7 @@ MetaObjectConverterFactory
     itkGenericExceptionMacro(<< "Can't convert Unknown MetaObject type " <<
                           metaTypeName);
     }
-  return (*(it->second))(objectToConvert);
+  return (it->second)(objectToConvert);
 }
 MetaObject *
 MetaObjectConverterFactory
@@ -55,12 +55,12 @@ MetaObjectConverterFactory
     itkGenericExceptionMacro(<< "Can't convert Unknown MetaObject type " <<
                           metaTypeName);
     }
-  return (*(it->second))(objectToConvert);
+  return (it->second)(objectToConvert);
 }
 
 void
 MetaObjectConverterFactory
-::RegisterConverter(const char *className,MetaObjectConversionFunction *converter)
+::RegisterConverter(const char *className,MetaObjectConversionFunction converter)
 {
   const std::string metaTypeName(className);
   MapType::iterator it = m_ConverterMap.find(metaTypeName);
