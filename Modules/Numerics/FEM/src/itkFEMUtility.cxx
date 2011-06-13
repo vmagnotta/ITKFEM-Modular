@@ -17,6 +17,12 @@
  *=========================================================================*/
 
 #include "itkFEMUtility.h"
+#include "itkMetaObjectConverterFactory.h"
+#include "itkMacro"
+#include "metaObject.h"
+#include "metaFEMObject.h"
+#include "itkFEMObjectSpatialObject.h"
+#include "itkSpatialObject.h"
 
 namespace itk
 {
@@ -155,5 +161,47 @@ const double GaussIntegrate::w[110] =
   0.131688638449177, 0.142096109318382, 0.149172986472604,
   0.152753387130726
   };
+
+template <unsigned NDimension>
+MetaObject *InternalConvertFEMMetaObject(void *objToConvert)
+{
+  typedef SpatialObject<NDimension> SpatialObjectType;
+
+  SpatialObjectType *so =
+    reinterpret_cast<SpatialObjectType *>(objToConvert);
+
+  typedef itk::FEMObjectSpatialObject<NDimension> FEMSOType;
+  FEMSOType * femSO = dynamic_cast<FEMSOType *>(so);
+  if(fmeSO != 0)
+    {
+    typedef itk::fem::FEMObject<NDimension> FEMObjectType;
+
+    MetaFEMObjectConverter<NDimension> converter;
+    MetaFEMObject            *fem =
+      converter.FEMObjectSpatialObjectToMetaFEMObject(fmeSO);
+    if(objToConvert->GetParent())
+      {
+      fem->ParentID(objToConvert->GetParent()->GetId());
+      }
+    fem->Name(objToConvert->GetProperty()->GetName().c_str());
+    this->SetTransform(fem, objToConvert->GetObjectToParentTransform());
+    return fem;
+    }
+  return 0;
 }
+
+MetaObject *
+ConvertFEMMetaObject(void *objToConvert)
+{
+  MetaObject *rval;
+  if((rval = InternalConvertFEMMetaObject<2>(objToConvert)) == 0 &&
+     (rval = InternalConvertFEMMetaObject<3>(objToConvert)) == 0)
+    {
+    itkGenericExceptionMacro(<< "Can't convert MetaObject to FEMMetaObject");
+    }
+  return rval;
+}
+
+}
+
 }  // end namespace itk::fem

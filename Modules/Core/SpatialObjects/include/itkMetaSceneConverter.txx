@@ -33,6 +33,7 @@
 #include "itkMetaLandmarkConverter.h"
 #include "itkMetaArrowConverter.h"
 #include "itkMetaContourConverter.h"
+#include "itkMetaObjectConverterFactory.h"
 
 #ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
 #include "itkMetaFEMObjectConverter.h"
@@ -575,6 +576,11 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
       mesh->Name( ( *it )->GetProperty()->GetName().c_str() );
       this->SetTransform( mesh, ( *it )->GetObjectToParentTransform() );
       metaScene->AddObject(mesh);
+      }
+    else
+      {
+      MetaObject *mObject = MetaObjectConverterFactory::Convert((*it).GetPointer());
+      metaScene->AddObject(mObject);
       }
 #ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
     if(!strncmp((*it)->GetTypeName(),"FEMObjectSpatialObject",22))

@@ -17,7 +17,6 @@ PURPOSE.  See the above copyright notices for more information.
 #include "itkFEMFactoryBase.h"
 #include "itkFEMFactory.h"
 #include "itkVersion.h"
-
 #include "itkFEMElement2DC0LinearLineStress.h"
 #include "itkFEMElement2DC0LinearQuadrilateralMembrane.h"
 #include "itkFEMElement2DC0LinearQuadrilateralStrain.h"
@@ -45,6 +44,9 @@ PURPOSE.  See the above copyright notices for more information.
 #include "itkFEMLoadPoint.h"
 
 #include "itkFEMMaterialLinearElasticity.h"
+
+#include "itkFEMUtility.h"
+#include "itkMetaObjectConverterFactory.h"
 
 namespace itk
 {
@@ -88,6 +90,10 @@ void FEMFactoryBase::RegisterDefaultTypes()
     FEMFactory<itk::fem::LoadGravConst>::RegisterType();
     FEMFactory<itk::fem::LoadElement>::RegisterType();
     FEMFactory<itk::fem::MaterialLinearElasticity>::RegisterType();
+    //
+    // register a converter for FEMObjectSpatialObjects
+    MetaObjectConverterFactory::RegisterConverter("FEMObjectSpatialObject",
+                                                  itk::fem::ConvertFEMMetaObject);
     }
 }
 

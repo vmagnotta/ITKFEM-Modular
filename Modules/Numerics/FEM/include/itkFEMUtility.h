@@ -50,6 +50,12 @@ public:
   double              Integrate(double ( *f )(double), double a, double b, int n = 3);
 
 };
+/**
+ * \fn helper function to do conversion from generic metObject to
+ * METAFEMObject.
+ */
+extern MetaObject *ConvertFEMMetaObject(void *objToConvert);
+
 }
 }  /* end namespace itk */
 

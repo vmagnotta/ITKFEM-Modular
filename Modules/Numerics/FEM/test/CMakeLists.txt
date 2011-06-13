@@ -1,5 +1,5 @@
 itk_module_test()
-
+if(0)
 # Find the top of the main ITK source tree.
 get_filename_component(ITK_TOP_DIR ${ITK-FEM_SOURCE_DIR}/../../.. ABSOLUTE)
 include(${ITK_TOP_DIR}/CMake/ITKExternalData.cmake)
@@ -294,3 +294,4 @@ itk_add_test(NAME itkImageToRectilinearFEMObjectFilter3DTest ${FEM_TESTS3}
 
 
 
+endif(0)
