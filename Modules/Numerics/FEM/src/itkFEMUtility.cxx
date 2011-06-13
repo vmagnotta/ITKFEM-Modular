@@ -202,6 +202,6 @@ ConvertFEMMetaObject(void *objToConvert)
   return rval;
 }
 
-}
+}  //end namespace fem
 
-}  // end namespace itk::fem
+}  // end namespace itk
