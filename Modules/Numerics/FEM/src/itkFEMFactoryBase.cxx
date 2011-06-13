@@ -93,7 +93,7 @@ void FEMFactoryBase::RegisterDefaultTypes()
     //
     // register a converter for FEMObjectSpatialObjects
     MetaObjectConverterFactory::RegisterConverter("FEMObjectSpatialObject",
-                                                  itk::fem::ConvertFEMMetaObject);
+                                                  ::itk::fem::ConvertFEMMetaObject);
     }
 }
 

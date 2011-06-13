@@ -87,7 +87,7 @@ protected:  // If we're using smart pointers, constructors and destructors
   /**
    * Copy constructor must be available for the FEM objects...
    */
-  FEMLightObject(const FEMLightObject & o)
+  FEMLightObject(const FEMLightObject & o) : itk::LightObject()
   {
     m_GlobalNumber = o.m_GlobalNumber;
   }

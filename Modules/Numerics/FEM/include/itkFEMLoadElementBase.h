@@ -83,9 +83,7 @@ public:
   std::vector<Element::ConstPointer> & GetElementArray();
 
   // FIXME: Add documentation
-  virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
-  {
-  }
+  virtual void ApplyLoad(Element::ConstPointer , Element::VectorType & ) { }
 protected:
   virtual void PrintSelf(std::ostream& os, Indent indent) const;
 

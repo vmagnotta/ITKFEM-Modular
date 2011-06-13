@@ -20,6 +20,7 @@
 
 #include <string>
 #include <iostream>
+#include "MetaObject.h"
 
 class MetaObject;
 
