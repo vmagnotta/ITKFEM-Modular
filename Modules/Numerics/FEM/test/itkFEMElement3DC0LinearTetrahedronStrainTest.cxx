@@ -27,6 +27,12 @@
 
 int itkFEMElement3DC0LinearTetrahedronStrainTest(int argc, char *argv[])
 {
+  //Need to register default FEM object types,
+  //and setup SpatialReader to recognize FEM types
+  //which is all currently done as a HACK in
+  //the initializaiton of the itk::FEMFactoryBase::GetFactory()
+  itk::FEMFactoryBase::GetFactory()->RegisterDefaultTypes();
+
   typedef itk::fem::Solver<3> Solver3DType;
   Solver3DType::Pointer solver = Solver3DType::New();
 

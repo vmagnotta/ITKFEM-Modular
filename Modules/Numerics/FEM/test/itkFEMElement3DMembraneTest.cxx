@@ -24,6 +24,7 @@
 //
 int itkFEMElement3DMembraneTest(int, char *[])
 {
+
   typedef itk::fem::Node    NodeType;
   typedef itk::fem::Element ElementType;
 

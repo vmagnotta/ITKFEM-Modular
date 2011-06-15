@@ -706,9 +706,9 @@ private:
   /**
    * FIXME DOCUMENATION HERE
    */
-  virtual void PopulateEdgeIds(void) const;
-
+  virtual void PopulateEdgeIds(void) const {/*HACK:  This should never be called, perhaps thow an exception.*/} // = 0; //HACK:  Make this an abstract base class that require specialization
 protected:
+
   // to store edge connectivity data
   std::vector<std::vector<int> > m_EdgeIds;
 

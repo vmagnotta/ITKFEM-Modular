@@ -235,24 +235,24 @@ Element3DC0LinearTriangular
 
 Element3DC0LinearTriangular::Float
 Element3DC0LinearTriangular
-::JacobianDeterminant(const VectorType & pt, const MatrixType *pJ) const
+::JacobianDeterminant(const VectorType & /*HACK pt*/, const MatrixType * /*HACK pJ*/) const
 {
   // use heron's formula
-  int na = 0;
-  int nb = 1;
-  int nc = 2;
+  const int na = 0;
+  const int nb = 1;
+  const int nc = 2;
 
-  VectorType A = this->GetNode(na)->GetCoordinates();
-  VectorType B = this->GetNode(nb)->GetCoordinates();
-  VectorType C = this->GetNode(nc)->GetCoordinates();
-  VectorType BA = B - A;
-  VectorType CA = C - A;
-  VectorType CB = C - B;
-  float      L1 = CB.magnitude();
-  float      L2 = CA.magnitude();
-  float      L3 = BA.magnitude();
+  const VectorType &A = this->GetNode(na)->GetCoordinates();
+  const VectorType &B = this->GetNode(nb)->GetCoordinates();
+  const VectorType &C = this->GetNode(nc)->GetCoordinates();
+  const VectorType &BA = B - A;
+  const VectorType &CA = C - A;
+  const VectorType &CB = C - B;
+  const float L1 = CB.magnitude();
+  const float L2 = CA.magnitude();
+  const float L3 = BA.magnitude();
 
-  float s = ( L1 + L2 + L3 ) * .5;
+  const float s = ( L1 + L2 + L3 ) * .5;
   Float det = sqrt( s * ( s - L1 ) * ( s - L2 ) * ( s - L3 ) );
 
 /*

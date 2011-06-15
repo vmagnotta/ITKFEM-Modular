@@ -24,6 +24,7 @@
 //
 int itkFEMElement2DStrainTest(int, char *[])
 {
+
   typedef itk::fem::Node    NodeType;
   typedef itk::fem::Element ElementType;
 

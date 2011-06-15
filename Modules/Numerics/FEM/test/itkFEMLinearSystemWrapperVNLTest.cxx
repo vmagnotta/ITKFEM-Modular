@@ -22,6 +22,7 @@
 /* Testing for linear system wrappers */
 int itkFEMLinearSystemWrapperVNLTest(int, char *[])
 {
+
   /* loop vars for printing */
   unsigned int i;
   unsigned int j;

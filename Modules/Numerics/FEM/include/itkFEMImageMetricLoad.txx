@@ -784,34 +784,41 @@ ImageMetricLoad<TMoving, TFixed>::GetPolynomialFitToMetric
 
 template <class TMoving, class TFixed>
 void
-ImageMetricLoad<TMoving, TFixed>::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
+ImageMetricLoad<TMoving, TFixed>::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe) //HACK:   warning: declaration of ‘Fe’ shadows a member of 'this'
 {
   const unsigned int TotalSolutionIndex = 1; /* Need to change if the index
                                               * changes in CrankNicolsonSolver
                                               */
 
-  typename Solution::ConstPointer S = this->GetSolution(); // has current
-                                                           // solution state
+  // has current solution state
+  const typename Solution::ConstPointer S = this->GetSolution();
 
   // Order of integration
   // FIXME: Allow changing the order of integration by setting a
   //        static member within an element base class.
-  unsigned int order = this->GetNumberOfIntegrationPoints();
+  const unsigned int order = this->GetNumberOfIntegrationPoints();
 
   const unsigned int Nip = element->GetNumberOfIntegrationPoints(order);
-  const unsigned int Ndofs = element->GetNumberOfDegreesOfFreedomPerNode();
   const unsigned int Nnodes = element->GetNumberOfNodes();
-  unsigned int       ImageDimension = Ndofs;
 
-  Element::VectorType force(Ndofs, 0.0),
-  ip, gip, gsol, force_tmp, shapef;
-  Element::Float w, detJ;
+  const unsigned int Ndofs = element->GetNumberOfDegreesOfFreedomPerNode();
+  const unsigned int &ImageDimension = Ndofs; //HACK:  warning: declaration of ‘ImageDimension’ shadows a member of 'this'
+
+  Element::VectorType ip;
 
   Fe.set_size( element->GetNumberOfDegreesOfFreedom() );
   Fe.fill(0.0);
+
+  Element::VectorType shapef;
   shapef.set_size(Nnodes);
-  gsol.set_size(Ndofs);
-  gip.set_size(Ndofs);
+
+  Element::VectorType gsol(Ndofs,0.0);
+  Element::VectorType gip(Ndofs, 0.0);
+
+  //Element::VectorType force_tmp;
+  //
+  Element::Float w;
+  Element::VectorType force(Ndofs, 0.0);
   for( unsigned int i = 0; i < Nip; i++ )
     {
     element->GetIntegrationPointAndWeight(i, ip, w, order);
@@ -837,12 +844,11 @@ ImageMetricLoad<TMoving, TFixed>::ApplyLoad(Element::ConstPointer element, Eleme
       {
       shapef = element->ShapeFunctions(ip);
       }
-    float solval, posval;
-    detJ = element->JacobianDeterminant(ip);
+    const Element::Float detJ = element->JacobianDeterminant(ip);
     for( unsigned int f = 0; f < ImageDimension; f++ )
       {
-      solval = 0.0;
-      posval = 0.0;
+      float solval = 0.0;
+      float posval = 0.0;
       for( unsigned int n = 0; n < Nnodes; n++ )
         {
         posval += shapef[n] * ( ( element->GetNodeCoordinates(n) )[f] );
@@ -856,8 +862,7 @@ ImageMetricLoad<TMoving, TFixed>::ApplyLoad(Element::ConstPointer element, Eleme
     // that it is equal to the number of DOFs per node. If the Fg returned
     // a vector with less dimensions, we add zero elements. If the Fg
     // returned a vector with more dimensions, we remove the extra dimensions.
-    force.fill(0.0);
-
+    force.fill(0.0); //HACK:  Is this setting to all zeros necessary given that the next line overwrites the values anyway
     force = this->Fe(gip, gsol);
     // Calculate the equivalent nodal loads
     for( unsigned int n = 0; n < Nnodes; n++ )

@@ -91,7 +91,7 @@ public:
 protected:
   virtual void PrintSelf(std::ostream& os, Indent indent) const;
 
-  virtual void PopulateEdgeIds(void);
+  virtual void PopulateEdgeIds(void) ; //HACK:  Should PopulateEdgeIds be const or not in this heirarchy.  Sometimes it is, sometimes it is not.
 
 };
 }

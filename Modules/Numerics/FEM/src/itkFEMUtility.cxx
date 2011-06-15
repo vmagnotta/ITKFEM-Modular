@@ -18,7 +18,7 @@
 
 #include "itkFEMUtility.h"
 #include "itkMetaObjectConverterFactory.h"
-#include "itkmetaFEMObjectConverter.h"
+#include "itkMetaFEMObjectConverter.h"
 #include "itkMacro.h"
 #include "metaObject.h"
 #include "metaFEMObject.h"
@@ -164,7 +164,7 @@ const double GaussIntegrate::w[110] =
   };
 
 template <unsigned NDimension>
-MetaObject *InternalConvertFEMMetaObject(void *objToConvert)
+MetaObject *InternalConvertSpatialObjectFEMMetaObject(void *objToConvert)
 {
   typedef SpatialObject<NDimension> SpatialObjectType;
 
@@ -194,8 +194,9 @@ MetaObject *
 ConvertFEMMetaObject(void *objToConvert)
 {
   MetaObject *rval;
-  if((rval = InternalConvertFEMMetaObject<2>(objToConvert)) == 0 &&
-     (rval = InternalConvertFEMMetaObject<3>(objToConvert)) == 0)
+  if((rval = InternalConvertSpatialObjectFEMMetaObject<2>(objToConvert)) == 0 &&
+     (rval = InternalConvertSpatialObjectFEMMetaObject<3>(objToConvert)) == 0
+     )
     {
     itkGenericExceptionMacro(<< "Can't convert MetaObject to FEMMetaObject");
     }

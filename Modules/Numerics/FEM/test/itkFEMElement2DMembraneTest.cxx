@@ -24,6 +24,7 @@
 //
 int itkFEMElement2DMembraneTest(int, char *argv[])
 {
+
   typedef itk::fem::Node    NodeType;
   typedef itk::fem::Element ElementType;
 

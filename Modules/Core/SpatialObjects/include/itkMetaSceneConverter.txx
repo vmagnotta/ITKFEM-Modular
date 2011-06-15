@@ -34,10 +34,7 @@
 #include "itkMetaArrowConverter.h"
 #include "itkMetaContourConverter.h"
 #include "itkMetaObjectConverterFactory.h"
-
-#ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
-#include "itkMetaFEMObjectConverter.h"
-#endif
+#include "itkSpatialObjectConverterFactory.h"
 
 #include <algorithm>
 
@@ -278,13 +275,19 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
         (MetaContour *)*it);
       soScene->AddSpatialObject( (SpatialObjectType *)so.GetPointer() );
       }
+    else
+      {
+      typename itk::SpatialObject<NDimensions>::Pointer so = SpatialObjectConverterFactory<NDimensions>::GetInstance()->Convert(*it);
+      this->SetTransform(so, *it);
+      soScene->AddSpatialObject( so);
+      }
 #ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
     if(!strncmp((*it)->ObjectTypeName(),"FEMObject",9))
       {
       typedef itk::fem::FEMObject<NDimensions> FEMObjectType;
-      MetaFEMObjectConverter<NDimensions> FEMObjectConverter;
-      typename itk::FEMObjectSpatialObject<NDimensions>::Pointer so =
-          FEMObjectConverter.MetaFEMObjectToFEMObjectSpatialObject((MetaFEMObject*)*it);
+      MetaFEMObjectConverter<NDimensions> converter;
+      typename itk::SpatialObject<NDimensions>::Pointer so =
+          converter.MetaFEMObjectToFEMObjectSpatialObject((MetaFEMObject*)*it);
       this->SetTransform(so, *it);
       soScene->AddSpatialObject( so);
       }

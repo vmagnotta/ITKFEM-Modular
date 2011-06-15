@@ -345,8 +345,8 @@ MetaFEMObjectConverter<NDimensions>
   // copy the relevant info from spatial object to femobject
 
   // copy node info.
-  int numNodes = SOFEMObject->GetNumberOfNodes();
-  for (int i=0; i<numNodes; i++)
+  const int numSONodes = SOFEMObject->GetNumberOfNodes();
+  for (int i=0; i<numSONodes; i++)
   {
   FEMObjectNode *Node = new FEMObjectNode(NDimensions);
   itk::fem::Node::Pointer SONode = SOFEMObject->GetNode(i);
@@ -387,11 +387,11 @@ MetaFEMObjectConverter<NDimensions>
    }
 
    // copy element info.
-  int numElements = SOFEMObject->GetNumberOfElements();
+  const int numElements = SOFEMObject->GetNumberOfElements();
   for (int i=0; i<numElements; i++)
   {
     itk::fem::Element::Pointer SOElement = SOFEMObject->GetElement(i);
-    int numNodes = SOElement->GetNumberOfNodes();
+    const int numNodes = SOElement->GetNumberOfNodes();
   FEMObjectElement *Element = new FEMObjectElement(numNodes);
 
   Element->m_GN = SOElement->GetGlobalNumber();
@@ -410,167 +410,165 @@ MetaFEMObjectConverter<NDimensions>
 
   // copy load/bc info.
     int numLoads = SOFEMObject->GetNumberOfLoads();
-   for (int i=0; i<numLoads; i++)
-   {
-     itk::fem::Load::Pointer SOLoad = SOFEMObject->GetLoad(i);
-  FEMObjectLoad *Load = new FEMObjectLoad;
+   for (int ll=0; ll<numLoads; ++ll)
+     {
+     itk::fem::Load::Pointer SOLoad = SOFEMObject->GetLoad(ll);
+     FEMObjectLoad *Load = new FEMObjectLoad;
 
-  // check for the load/bc type
-  std::string load_name = SOLoad->GetNameOfClass();
-  strcpy(Load->m_LoadName, load_name.c_str());
-  if(load_name == "LoadNode")
-  {
-      itk::fem::LoadNode::Pointer SOLoadCast =
-      dynamic_cast< itk::fem::LoadNode * >( &*SOLoad );
+     // check for the load/bc type
+     std::string load_name = SOLoad->GetNameOfClass();
+     strcpy(Load->m_LoadName, load_name.c_str());
+     if(load_name == "LoadNode")
+       {
+       itk::fem::LoadNode::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadNode * >( &*SOLoad );
 
-      Load->m_GN = SOLoadCast->GetGlobalNumber();
-      Load->m_ElementGN = SOLoadCast->GetElement()->GetGlobalNumber();
-      Load->m_NodeNumber = SOLoadCast->GetNode();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_ElementGN = SOLoadCast->GetElement()->GetGlobalNumber();
+       Load->m_NodeNumber = SOLoadCast->GetNode();
 
-      int dim = SOLoadCast->GetForce().size();
-      Load->m_ForceVector.resize(dim);
-      Load->m_Dim = dim;
-      for (int j=0; j<dim; j++)
-      {
-      Load->m_ForceVector[j] = SOLoadCast->GetForce()[j];
-      }
-    FEMObject->GetLoadList().push_back(Load);
-  }
+       int dim = SOLoadCast->GetForce().size();
+       Load->m_ForceVector.resize(dim);
+       Load->m_Dim = dim;
+       for (int j=0; j<dim; j++)
+         {
+         Load->m_ForceVector[j] = SOLoadCast->GetForce()[j];
+         }
+       FEMObject->GetLoadList().push_back(Load);
+       }
 
-  if(load_name == "LoadBC")
-  {
-      itk::fem::LoadBC::Pointer SOLoadCast =
-      dynamic_cast< itk::fem::LoadBC * >( &*SOLoad );
+     if(load_name == "LoadBC")
+       {
+       itk::fem::LoadBC::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadBC * >( &*SOLoad );
 
-      Load->m_GN = SOLoadCast->GetGlobalNumber();
-      Load->m_DOF = SOLoadCast->GetDegreeOfFreedom();
-      Load->m_ElementGN = SOLoadCast->GetElement()->GetGlobalNumber();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_DOF = SOLoadCast->GetDegreeOfFreedom();
+       Load->m_ElementGN = SOLoadCast->GetElement()->GetGlobalNumber();
 
-      int numRHS = SOLoadCast->GetValue().size();
-      Load->m_RHS.resize(numRHS);
-      Load->m_NumRHS = numRHS;
-      for (int j=0; j<numRHS; j++)
-      {
-      Load->m_RHS[j] = SOLoadCast->GetValue()[j];
-      }
-    FEMObject->GetLoadList().push_back(Load);
-  }
+       int numRHS = SOLoadCast->GetValue().size();
+       Load->m_RHS.resize(numRHS);
+       Load->m_NumRHS = numRHS;
+       for (int j=0; j<numRHS; j++)
+         {
+         Load->m_RHS[j] = SOLoadCast->GetValue()[j];
+         }
+       FEMObject->GetLoadList().push_back(Load);
+       }
 
-  if(load_name == "LoadBCMFC")
-  {
-    int elementGN;
-    int DOF;
-    float Value;
+     if(load_name == "LoadBCMFC")
+       {
+       int elementGN;
+       int DOF;
+       float Value;
 
-    itk::fem::LoadBCMFC::Pointer SOLoadCast =
-    dynamic_cast< itk::fem::LoadBCMFC * >( &*SOLoad );
+       itk::fem::LoadBCMFC::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadBCMFC * >( &*SOLoad );
 
-    Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
 
-    Load->m_NumLHS = SOLoadCast->GetNumberOfLeftHandSideTerms();
+       Load->m_NumLHS = SOLoadCast->GetNumberOfLeftHandSideTerms();
 
-    for ( int i = 0; i < Load->m_NumLHS; i++ )
-    {
-      /** set the global number of element that we're applying the load to */
-      elementGN = SOLoadCast->GetLeftHandSideTerm(i).m_element->GetGlobalNumber();
+       for ( int i = 0; i < Load->m_NumLHS; i++ )
+         {
+         /** set the global number of element that we're applying the load to */
+         elementGN = SOLoadCast->GetLeftHandSideTerm(i).m_element->GetGlobalNumber();
 
-      /** set the dof within that element */
-      DOF = SOLoadCast->GetLeftHandSideTerm(i).dof;
+         /** set the dof within that element */
+         DOF = SOLoadCast->GetLeftHandSideTerm(i).dof;
 
-      /** set weight */
-      Value = SOLoadCast->GetLeftHandSideTerm(i).value;
+         /** set weight */
+         Value = SOLoadCast->GetLeftHandSideTerm(i).value;
 
-      /** add a new MFCTerm to the lhs */
-      FEMObjectMFCTerm *mfcTerm = new FEMObjectMFCTerm(elementGN, DOF, Value);
-      Load->m_LHS.push_back(mfcTerm);
-    }
+         /** add a new MFCTerm to the lhs */
+         FEMObjectMFCTerm *mfcTerm = new FEMObjectMFCTerm(elementGN, DOF, Value);
+         Load->m_LHS.push_back(mfcTerm);
+         }
 
-    /** set the rhs */
-    Load->m_NumRHS = SOLoadCast->GetNumberOfRightHandSideTerms();
-    Load->m_RHS.resize(Load->m_NumRHS);
-    for (int i=0; i<Load->m_NumRHS; i++)
-    {
-      Load->m_RHS[i] = SOLoadCast->GetRightHandSideTerm(i);
-    }
-    FEMObject->GetLoadList().push_back(Load);
-  }
+       /** set the rhs */
+       Load->m_NumRHS = SOLoadCast->GetNumberOfRightHandSideTerms();
+       Load->m_RHS.resize(Load->m_NumRHS);
+       for (int i=0; i<Load->m_NumRHS; i++)
+         {
+         Load->m_RHS[i] = SOLoadCast->GetRightHandSideTerm(i);
+         }
+       FEMObject->GetLoadList().push_back(Load);
+       }
 
-  if(load_name == "LoadEdge")
-  {
-    itk::fem::LoadEdge::Pointer SOLoadCast =
-    dynamic_cast< itk::fem::LoadEdge * >( &*SOLoad );
+     if(load_name == "LoadEdge")
+       {
+       itk::fem::LoadEdge::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadEdge * >( &*SOLoad );
 
-    int numRows, numCols;
 
-    Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
 
-    Load->m_ElementGN = SOLoadCast->GetElementArray()[0]->GetGlobalNumber();
-    Load->m_EdgeNumber = SOLoadCast->GetEdge();
+       Load->m_ElementGN = SOLoadCast->GetElementArray()[0]->GetGlobalNumber();
+       Load->m_EdgeNumber = SOLoadCast->GetEdge();
 
-    vnl_matrix< itk::fem::Element::Float > force = SOLoadCast->GetForce();
+       vnl_matrix< itk::fem::Element::Float > force = SOLoadCast->GetForce();
 
-    numRows = force.rows();
-    numCols = force.columns();
+       const int numRows = force.rows();
+       const int numCols = force.columns();
 
-    for ( int i = 0; i < numRows; i++ )
-    {
-      METAIO_STL::vector<float> F(numCols);
-      for ( int j = 0; j < numCols; j++ )
-      {
-        F[j] = force[i][j];
-      }
-      Load->m_ForceMatrix.push_back(F);
-    }
-    FEMObject->GetLoadList().push_back(Load);
-  }
+       for ( int i = 0; i < numRows; i++ )
+         {
+         METAIO_STL::vector<float> F(numCols);
+         for ( int j = 0; j < numCols; j++ )
+           {
+           F[j] = force[i][j];
+           }
+         Load->m_ForceMatrix.push_back(F);
+         }
+       FEMObject->GetLoadList().push_back(Load);
+       }
 
-  if(load_name == "LoadGravConst")
-  {
-    itk::fem::LoadGravConst::Pointer SOLoadCast =
-    dynamic_cast< itk::fem::LoadGravConst * >( &*SOLoad );
+     if(load_name == "LoadGravConst")
+       {
+       itk::fem::LoadGravConst::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadGravConst * >( &*SOLoad );
 
-    Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
 
-    int numElements  = SOLoadCast->GetElementArray().size();
-    Load->m_NumElements = numElements;
-    int elementGN;
-    for (int i=0; i<numElements; i++)
-    {
-      elementGN = SOLoadCast->GetElementArray()[i]->GetGlobalNumber();
-      Load->m_Elements.push_back(elementGN);
-    }
+       const int numElements  = SOLoadCast->GetElementArray().size();
+       Load->m_NumElements = numElements;
+       for (int i=0; i<numElements; i++)
+         {
+         const int elementGN = SOLoadCast->GetElementArray()[i]->GetGlobalNumber();
+         Load->m_Elements.push_back(elementGN);
+         }
 
-    Load->m_Dim = SOLoadCast->GetForce().size();
-    for (int i=0; i<Load->m_Dim; i++)
-    {
-      Load->m_ForceVector.push_back(SOLoadCast->GetForce()[i]);
-    }
+       Load->m_Dim = SOLoadCast->GetForce().size();
+       for (int i=0; i<Load->m_Dim; i++)
+         {
+         Load->m_ForceVector.push_back(SOLoadCast->GetForce()[i]);
+         }
 
-    FEMObject->GetLoadList().push_back(Load);
-  }
+       FEMObject->GetLoadList().push_back(Load);
+       }
 
-  if(load_name == "LoadLandmark")
-  {
-    itk::fem::LoadLandmark::Pointer SOLoadCast =
-    dynamic_cast< itk::fem::LoadLandmark * >( &*SOLoad );
+     if(load_name == "LoadLandmark")
+       {
+       itk::fem::LoadLandmark::Pointer SOLoadCast =
+         dynamic_cast< itk::fem::LoadLandmark * >( &*SOLoad );
 
-    Load->m_GN = SOLoadCast->GetGlobalNumber();
+       Load->m_GN = SOLoadCast->GetGlobalNumber();
 
-    Load->m_Variance = SOLoadCast->GetEta();
+       Load->m_Variance = SOLoadCast->GetEta();
 
-    int dim = SOLoadCast->GetSource().size();
+       const int dim = SOLoadCast->GetSource().size();
 
-    Load->m_Undeformed.resize(dim);
-    Load->m_Deformed.resize(dim);
+       Load->m_Undeformed.resize(dim);
+       Load->m_Deformed.resize(dim);
 
-    for (int i=0; i<dim; i++)
-    {
-    Load->m_Deformed[i] = SOLoadCast->GetSource()[i];
-    Load->m_Undeformed[i] = SOLoadCast->GetTarget()[i];
-    }
-    FEMObject->GetLoadList().push_back(Load);
-  }
-   }
+       for (int i=0; i<dim; i++)
+         {
+         Load->m_Deformed[i] = SOLoadCast->GetSource()[i];
+         Load->m_Undeformed[i] = SOLoadCast->GetTarget()[i];
+         }
+       FEMObject->GetLoadList().push_back(Load);
+       }
+     }
   FEMObject->ID(spatialObject->GetId());
   if(spatialObject->GetParent())
     {

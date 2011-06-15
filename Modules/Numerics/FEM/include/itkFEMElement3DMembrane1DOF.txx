@@ -39,8 +39,9 @@ Element3DMembrane1DOF<TBaseClass>
 template <class TBaseClass>
 void
 Element3DMembrane1DOF<TBaseClass>
-::GetStrainDisplacementMatrix(MatrixType & B, const MatrixType & shapeDgl) const
+::GetStrainDisplacementMatrix(MatrixType & /*HACK B*/, const MatrixType & /*HACK shapeDgl*/) const
 {
+  //HACK:  Comment.
 }
 
 template <class TBaseClass>

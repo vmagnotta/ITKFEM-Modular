@@ -31,6 +31,12 @@ using std::ifstream;
 //
 int itkFEMLandmarkLoadImplementationTest(int, char *[])
 {
+  //Need to register default FEM object types,
+  //and setup SpatialReader to recognize FEM types
+  //which is all currently done as a HACK in
+  //the initializaiton of the itk::FEMFactoryBase::GetFactory()
+  itk::FEMFactoryBase::GetFactory()->RegisterDefaultTypes();
+
   unsigned int Dimension = 2;
 
   typedef itk::fem::FEMObject<2> FEMObjectType;

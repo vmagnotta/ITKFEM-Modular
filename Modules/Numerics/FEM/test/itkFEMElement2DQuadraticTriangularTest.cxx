@@ -24,6 +24,7 @@
 //
 int itkFEMElement2DQuadraticTriangularTest(int argc, char *argv[])
 {
+
   typedef itk::fem::Node    NodeType;
   typedef itk::fem::Element ElementType;
 

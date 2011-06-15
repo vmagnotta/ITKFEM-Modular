@@ -50,18 +50,34 @@ public:
   itkFactorylessNewMacro(Self);
 
   /** Register all builtin transforms */
-  static void RegisterDefaultTypes();
+  static void RegisterDefaultTypes();  //HACK: This should not have a public interface since it does nothing except during instantiation of the class.
 
   /** Register this transform */
   static FEMFactoryBase * GetFactory()
   {
     if( m_Factory == 0 )
       {
-      // Make and register the factory
-      FEMFactoryBase::Pointer p = FEMFactoryBase::New();
-      m_Factory = p.GetPointer();
-      ObjectFactoryBase::RegisterFactory( p );
-      p->RegisterDefaultTypes();
+      m_CreationLock.Lock();
+      //Need to make sure that during gaining access
+      //to the lock that some other thread did not
+      //initialize the singleton.
+      if( m_Factory == 0 )
+        {
+        // Make and register the factory
+        FEMFactoryBase::Pointer p = FEMFactoryBase::New();
+        if( p.IsNull() )
+          {
+          std::ostringstream message;
+          message << "itk::ERROR: " << "FEMFactoryBase"
+            << " instance not created";
+          ::itk::ExceptionObject e_(__FILE__, __LINE__, message.str().c_str(), ITK_LOCATION);
+          throw e_; /* Explicit naming to work around for Intel compiler bug. */
+          }
+        ObjectFactoryBase::RegisterFactory( p );
+        m_Factory = p.GetPointer();
+        }
+      m_CreationLock.Unlock();
+      m_Factory->RegisterDefaultTypes(); //Not initialzie all default types.
       }
     return m_Factory;
   }
@@ -82,7 +98,8 @@ private:
   FEMFactoryBase(const Self &); // purposely not implemented
   void operator=(const Self &); // purposely not implemented
 
-  static FEMFactoryBase* m_Factory;
+  static SimpleFastMutexLock m_CreationLock;
+  static FEMFactoryBase*     m_Factory;
 };
 } // end namespace itk
 

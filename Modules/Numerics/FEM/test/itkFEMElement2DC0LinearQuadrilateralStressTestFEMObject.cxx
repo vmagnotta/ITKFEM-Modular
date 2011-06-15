@@ -25,6 +25,12 @@
 //  Example taken from 'Fundamentals of the Finite ELement Method' - Grandin
 int itkFEMElement2DC0LinearQuadrilateralStressTestFEMObject(int argc, char *argv[])
 {
+  //Need to register default FEM object types,
+  //and setup SpatialReader to recognize FEM types
+  //which is all currently done as a HACK in
+  //the initializaiton of the itk::FEMFactoryBase::GetFactory()
+  itk::FEMFactoryBase::GetFactory()->RegisterDefaultTypes();
+
   unsigned int Dimension = 2;
 
   typedef itk::fem::FEMObject<2> FEMObjectType;
