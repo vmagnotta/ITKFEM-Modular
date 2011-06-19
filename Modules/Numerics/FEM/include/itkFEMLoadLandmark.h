@@ -178,11 +178,12 @@ public:
   {
   }
 
+  /** Get/Set the eta parameter, square root of the variance, for the load */
   void SetEta(double e);
 
   double GetEta();
 
-  // FIXME - Documentation
+  /** Apply the load to the specified element */
   virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe);
 
 protected:

@@ -103,6 +103,10 @@ public:
     return NumberOfNodes;
   }
 
+  /**
+   * Get/Set the Nodes that define the element
+   */
+   
   virtual NodeIDType GetNode(unsigned int n) const
   {
     if( n >= NumberOfNodes )
@@ -121,11 +125,13 @@ public:
     this->m_node[n] = node;
   }
 
+  /** Get the nodal coordinates */
   virtual const VectorType & GetNodeCoordinates(unsigned int n) const
   {
     return m_node[n]->GetCoordinates();
   }
 
+  /** Get the number of spatial dimensions */
   virtual unsigned int GetNumberOfSpatialDimensions() const
   {
     return NumberOfSpatialDimensions;

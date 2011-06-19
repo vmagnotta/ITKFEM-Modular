@@ -87,10 +87,13 @@ public:
    * Methods related to the geometry of an element
    */
 
+  /** Return the shape functions used to interpolate across the element */
   virtual VectorType ShapeFunctions(const VectorType & pt) const;
 
+  /** Return the shape functions derivatives in the shapeD matrix */
   virtual void ShapeFunctionDerivatives(const VectorType & pt, MatrixType & shapeD) const;
 
+  /** Convert from global to local coordinates */
   virtual bool GetLocalFromGlobalCoordinates(const VectorType & globalPt, VectorType & localPt) const;
 
   /**

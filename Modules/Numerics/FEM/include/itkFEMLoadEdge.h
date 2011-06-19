@@ -75,7 +75,7 @@ public:
    */
   vnl_matrix<itk::fem::Element::Float> & GetForce();
 
-  // FIXME - Documentation
+  /** Apply the load to the specified element */
   virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe);
 
 protected:

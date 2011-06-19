@@ -64,10 +64,10 @@ public:
    */
   Element1DStress();
 
-// ////////////////////////////////////////////////////////////////////////
-/*
- * Methods related to the physics of the problem.
- */
+  // ////////////////////////////////////////////////////////////////////////
+  /*
+   * Methods related to the physics of the problem.
+   */
 
   /**
    * Compute the B matrix.

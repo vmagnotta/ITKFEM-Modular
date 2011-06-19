@@ -131,7 +131,7 @@ public:
    */
   enum { InvalidDegreeOfFreedomID = 0xffffffff };
 
-// VAM - Move to its own file
+
 /**
  * \class Node
  * \brief Class that stores information required to define a node.
@@ -139,6 +139,8 @@ public:
  * A node can define a point in space and can hold an arbitrary number
  * of coordinates and the DOFs. Since the only classes that use nodes
  * are the elements, the node class is defined within an element base class.
+ *
+ * \note Possibly move this class to its own file
  */
   class Node : public FEMLightObject
   {
@@ -703,10 +705,9 @@ private:
    */
   virtual unsigned int GetNumberOfDegreesOfFreedomPerNode(void) const = 0;
 
-  /**
-   * FIXME DOCUMENATION HERE
-   */
+  /** Set the edge order and the points defining each edge */
   virtual void PopulateEdgeIds(void) const {/*HACK:  This should never be called, perhaps thow an exception.*/} // = 0; //HACK:  Make this an abstract base class that require specialization
+
 protected:
 
   // to store edge connectivity data

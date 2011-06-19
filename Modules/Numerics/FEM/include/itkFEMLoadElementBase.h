@@ -82,8 +82,9 @@ public:
 
   std::vector<Element::ConstPointer> & GetElementArray();
 
-  // FIXME: Add documentation
+  /** Apply the load to the specified element */
   virtual void ApplyLoad(Element::ConstPointer , Element::VectorType & ) { /* HACK:  This should probably through an execption if it is not intended to be used. */ }
+
 protected:
   virtual void PrintSelf(std::ostream& os, Indent indent) const;
 

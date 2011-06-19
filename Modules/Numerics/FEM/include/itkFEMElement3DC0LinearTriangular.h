@@ -67,25 +67,33 @@ public:
 
   enum { DefaultIntegrationOrder = 1 };
 
+  /** Get the Integration point and weight */
   virtual void GetIntegrationPointAndWeight(unsigned int i, VectorType & pt, Float & w, unsigned int order) const;
 
+  /** Get the number of integration points */
   virtual unsigned int GetNumberOfIntegrationPoints(unsigned int order) const;
 
-// ////////////////////////////////////////////////////////////////////////
-/*
- * Methods related to the geometry of an element
- */
+  // ////////////////////////////////////////////////////////////////////////
+  /*
+   * Methods related to the geometry of an element
+   */
 
+  /** Return the shape functions used to interpolate across the element */
   virtual VectorType ShapeFunctions(const VectorType & pt) const;
 
+  /** Return the shape functions derivatives in the shapeD matrix */
   virtual void ShapeFunctionDerivatives(const VectorType & pt, MatrixType & shapeD) const;
 
+  /** Convert from global to local coordinates */
   virtual bool GetLocalFromGlobalCoordinates(const VectorType & globalPt, VectorType & localPt) const;
 
+  /** Compute the determinate of the Jacobian matrix */
   virtual Float JacobianDeterminant(const VectorType & pt, const MatrixType *pJ = 0) const;
 
+  /** Compute the inverse of the Jacobian matrix */
   virtual void JacobianInverse(const VectorType & pt, MatrixType & invJ, const MatrixType *pJ = 0) const;
 
+  /** Define the edges and nodes that correspond to the edges */
   virtual void PopulateEdgeIds();
 
   /**
@@ -100,6 +108,7 @@ public:
   void GeneralizedProjectPoint(const VectorType & x, const VectorType & origin, const VectorType & normal,
                                VectorType & xproj) const;
 
+  /** Return the determinate of a 2x2 matrix */
   itk::fem::Element::Float Determinant2x2(const VectorType & c1, const VectorType & c2) const;
 
   /**

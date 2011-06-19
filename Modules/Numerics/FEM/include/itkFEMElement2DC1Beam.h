@@ -55,8 +55,6 @@ public:
    * including its internal member variables. */
   virtual::itk::LightObject::Pointer CreateAnother(void) const;
 
-  // FIXME: Write this class in the same way as the others -
-  //        properly define all virtual functions.
 
   /**
    * Default constructor only clears the internal storage
@@ -68,17 +66,23 @@ public:
    */
   Element2DC1Beam(Node::ConstPointer n1_, Node::ConstPointer n2_, Material::ConstPointer mat_);
 
-// ////////////////////////////////////////////////////////////////////////
-/*
- * Methods related to the physics of the problem.
- */
+  // ////////////////////////////////////////////////////////////////////////
+  /*
+   * Methods related to the physics of the problem.
+   */
+ 
+  /** Get the Stiffness matrix */
   virtual void GetStiffnessMatrix(MatrixType & Ke) const;
 
+  /** Get the Mass matrix */
   virtual void GetMassMatrix(MatrixType & Me) const;
 
+  /** Get the Strain Displacement matrix */
   virtual void GetStrainDisplacementMatrix(MatrixType &, const MatrixType &) const
   {
   }
+  
+  /** Get the Material matrix */
   virtual void GetMaterialMatrix(MatrixType &) const
   {
   }
@@ -89,6 +93,8 @@ public:
    */
 
   enum { DefaultIntegrationOrder = 1 };
+  
+  /** Get the Integration point and weight */
   virtual void GetIntegrationPointAndWeight(unsigned int i, VectorType & pt, Float & w, unsigned int order = 0) const;
 
   virtual unsigned int GetNumberOfIntegrationPoints(unsigned int order) const;
@@ -97,18 +103,23 @@ public:
   /**
    * Methods related to the geometry of an element
    */
-
+   
+  /** Return the shape functions used to interpolate across the element */
   virtual VectorType ShapeFunctions(const VectorType & pt) const;
 
+  /** Return the shape functions derivatives in the shapeD matrix */
   virtual void ShapeFunctionDerivatives(const VectorType & pt, MatrixType & shapeD) const;
 
+  /** Convert from global to local coordinates */
   virtual bool GetLocalFromGlobalCoordinates(const VectorType &, VectorType &) const
   {
     return false;
   }
 
+  /** Return the determinate of the Jacobian */
   virtual Float JacobianDeterminant(const VectorType & pt, const MatrixType *pJ) const;
 
+  /** Get the degrees of freedom for each node */
   virtual unsigned int GetNumberOfDegreesOfFreedomPerNode(void) const
   {
     return 3;

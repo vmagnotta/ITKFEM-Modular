@@ -65,8 +65,7 @@ public:
   */
   int GetGlobalNumber() const;
 
-protected:  // If we're using smart pointers, constructors and destructors
-            // should be protected.
+protected:  
 
   /**
    * Default constructor
@@ -91,7 +90,6 @@ protected:  // If we're using smart pointers, constructors and destructors
   {
     m_GlobalNumber = o.m_GlobalNumber;
   }
-protected:
 
   /**
    * Global number of an object (ID of an object)

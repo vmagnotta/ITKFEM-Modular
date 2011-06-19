@@ -63,10 +63,10 @@ public:
    */
   Element3DMembrane1DOF();
 
-// ////////////////////////////////////////////////////////////////////////
-/*
- * Methods related to the physics of the problem.
- */
+  // ////////////////////////////////////////////////////////////////////////
+  /*
+   * Methods related to the physics of the problem.
+   */
 
   /**
    * Compute the B matrix.
@@ -91,6 +91,7 @@ public:
     return 3;
   }
 
+  /** Get the Stiffness matrix */
   virtual void GetStiffnessMatrix(MatrixType & Ke) const;
 
   /**

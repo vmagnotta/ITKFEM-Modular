@@ -74,8 +74,10 @@ public:
 
   enum { DefaultIntegrationOrder = 1 };
 
+  /** Get the Integration point and weight */
   virtual void GetIntegrationPointAndWeight(unsigned int i, VectorType & pt, Float & w, unsigned int order) const;
 
+  /** Get the number of integration points */
   virtual unsigned int GetNumberOfIntegrationPoints(unsigned int order) const;
 
   // ////////////////////////////////////////////////////////////////////////
@@ -83,17 +85,20 @@ public:
    * Methods related to the geometry of an element
    */
 
+  /** Return the shape functions used to interpolate across the element */
   virtual VectorType ShapeFunctions(const VectorType & pt) const;
 
+  /** Return the shape functions derivatives in the shapeD matrix */
   virtual void ShapeFunctionDerivatives(const VectorType & pt, MatrixType & shapeD) const;
 
-  // FIXME: Write a proper implementation
+  /** Convert from global to local coordinates */
   virtual bool GetLocalFromGlobalCoordinates(const VectorType & globalPt, VectorType & localPt) const;
 
   // Since the Jacobian is not quadratic, we need to provide our
   // own implementation of calculating the determinant and inverse.
   virtual Float JacobianDeterminant(const VectorType & pt, const MatrixType *pJ = 0) const;
 
+  /** Return the inverse of the Jacobian */
   virtual void JacobianInverse(const VectorType & pt, MatrixType & invJ, const MatrixType *pJ = 0) const;
 
   /**

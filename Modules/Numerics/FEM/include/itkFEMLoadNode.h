@@ -84,8 +84,8 @@ public:
   void SetNode(int num);
 
   /**
- * Get the node number on which the load is being applied.
- */
+   * Get the node number on which the load is being applied.
+   */
   int GetNode();
 
   LoadNode() : m_Element(0)

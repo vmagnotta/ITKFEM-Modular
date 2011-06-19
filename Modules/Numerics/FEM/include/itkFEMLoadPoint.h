@@ -30,7 +30,6 @@ namespace fem
  * \class LoadPoint
  * \brief This load is applied on a point in an element.
  *
- * FIXME: To be implemented. Nothing works yet
  * \ingroup ITK-FEM
  */
 class LoadPoint : public LoadElement
@@ -58,7 +57,8 @@ public:
   LoadPoint() :
     m_Point(2), m_ForcePoint(2)
   {
-  }                                   /**  we initialize 2D point and force vector */
+    /** Default Initialization of 2D point and force vector */
+  }                                   
 
 /**
    * Set the point where the load acts
@@ -80,7 +80,7 @@ public:
    */
   vnl_vector<Float> GetForce();
 
-  // FIXME - Documentation
+  /** Apply the load to the specified element */
   virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe);
 
 protected:
