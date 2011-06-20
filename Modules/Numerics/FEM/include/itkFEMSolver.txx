@@ -384,8 +384,8 @@ void Solver<VDimension>::AssembleF(int dim)
 
     /**
      * Pass the vector to the solution to the Load object.
+     *  FIXME: Can this be removed?
      */
-    // VAM - Can this be removed???
     l0->SetSolution(m_ls);
 
     /**

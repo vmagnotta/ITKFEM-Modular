@@ -47,8 +47,6 @@ void LinearSystemWrapper::Clean(void)
 
 void LinearSystemWrapper::ScaleMatrix(Float scale, unsigned int matrixIndex)
 {
-  /* FIX ME: error checking */
-
   /* check for no scaling */
   if( scale == 1.0 )
     {
@@ -70,7 +68,6 @@ void LinearSystemWrapper::ScaleMatrix(Float scale, unsigned int matrixIndex)
 
 void LinearSystemWrapper::ScaleVector(Float scale, unsigned int vectorIndex)
 {
-  /* FIX ME: error checking */
 
   /* check for no scaling */
   if( scale == 1.0 )
@@ -89,8 +86,6 @@ void LinearSystemWrapper::ScaleVector(Float scale, unsigned int vectorIndex)
 
 void LinearSystemWrapper::ScaleSolution(Float scale, unsigned int solutionIndex)
 {
-  /* FIX ME: error checking */
-
   /* check for no scaling */
   if( scale == 1.0 )
     {
@@ -125,7 +120,6 @@ void LinearSystemWrapper::MultiplyMatrixVector(unsigned int resultVector,
                                                unsigned int matrixIndex,
                                                unsigned int vectorIndex)
 {
-  /* FIX ME: error checking */
 
   unsigned int i;
   unsigned int j;

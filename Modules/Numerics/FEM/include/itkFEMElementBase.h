@@ -90,7 +90,7 @@ public:
   /**
    * Array class that holds special pointers to the Element objects
    */
-// VAM - Remove FEMPArray Type ????
+  // FIXME - Remove FEMPArray Type and replace with VectorContainer version
   typedef FEMPArray<Element>                                   ArrayType;
   typedef VectorContainer<ElementIdentifier, Element::Pointer> ArrayType1;
 

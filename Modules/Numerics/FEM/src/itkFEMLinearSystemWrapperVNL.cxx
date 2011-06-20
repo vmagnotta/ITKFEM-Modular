@@ -27,7 +27,6 @@ namespace fem
 {
 void LinearSystemWrapperVNL::InitializeMatrix(unsigned int matrixIndex)
 {
-  /* FIX ME: error checking */
 
   // allocate if necessary
   if( m_Matrices == 0 )
