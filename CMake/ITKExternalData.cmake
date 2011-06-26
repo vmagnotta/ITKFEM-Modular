@@ -6,4 +6,7 @@ list(APPEND ExternalData_URL_TEMPLATES
 
   # Data published by MIDAS
   "http://midas.kitware.com/api/rest/midas.bitstream.by.hash?hash=%(hash)&algorithm=%(algo)"
+
+  # Data published via gerrit-push
+  "http://www.itk.org/files/ExternalData/%(algo)/%(hash)"
   )

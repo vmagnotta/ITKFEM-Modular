@@ -33,7 +33,8 @@
 #include "itkMetaLandmarkConverter.h"
 #include "itkMetaArrowConverter.h"
 #include "itkMetaContourConverter.h"
-
+#include "itkMetaObjectConverterFactory.h"
+#include "itkSpatialObjectConverterFactory.h"
 
 #include <algorithm>
 
@@ -274,6 +275,23 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
         (MetaContour *)*it);
       soScene->AddSpatialObject( (SpatialObjectType *)so.GetPointer() );
       }
+    else
+      {
+      typename itk::SpatialObject<NDimensions>::Pointer so = SpatialObjectConverterFactory<NDimensions>::GetInstance()->Convert(*it);
+      this->SetTransform(so, *it);
+      soScene->AddSpatialObject( so);
+      }
+#ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
+    if(!strncmp((*it)->ObjectTypeName(),"FEMObject",9))
+      {
+      typedef itk::fem::FEMObject<NDimensions> FEMObjectType;
+      MetaFEMObjectConverter<NDimensions> converter;
+      typename itk::SpatialObject<NDimensions>::Pointer so =
+          converter.MetaFEMObjectToFEMObjectSpatialObject((MetaFEMObject*)*it);
+      this->SetTransform(so, *it);
+      soScene->AddSpatialObject( so);
+      }
+#endif
 
     it++;
     }
@@ -562,7 +580,28 @@ MetaSceneConverter< NDimensions, PixelType, TMeshTraits >
       this->SetTransform( mesh, ( *it )->GetObjectToParentTransform() );
       metaScene->AddObject(mesh);
       }
-
+    else
+      {
+      MetaObject *mObject = MetaObjectConverterFactory::Convert((*it).GetPointer());
+      this->SetTransform(mObject,(*it)->GetObjectToParentTransform());
+      metaScene->AddObject(mObject);
+      }
+#ifdef __HACK_FIX_TO_MOVE_TO_FEM__MODULE
+    if(!strncmp((*it)->GetTypeName(),"FEMObjectSpatialObject",22))
+      {
+      typedef itk::fem::FEMObject<NDimensions> FEMObjectType;
+      MetaFEMObjectConverter<NDimensions> converter;
+      MetaFEMObject* fem = converter.FEMObjectSpatialObjectToMetaFEMObject(
+          dynamic_cast<itk::FEMObjectSpatialObject<NDimensions>*>((*it).GetPointer()));
+      if((*it)->GetParent())
+        {
+        fem->ParentID((*it)->GetParent()->GetId());
+        }
+      fem->Name((*it)->GetProperty()->GetName().c_str());
+      this->SetTransform(fem, (*it)->GetObjectToParentTransform());
+      metaScene->AddObject(fem);
+      }
+#endif
     it++;
     }
 
