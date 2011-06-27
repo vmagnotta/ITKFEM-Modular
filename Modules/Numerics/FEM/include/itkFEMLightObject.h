@@ -65,7 +65,7 @@ public:
   */
   int GetGlobalNumber() const;
 
-protected:  
+protected:
 
   /**
    * Default constructor

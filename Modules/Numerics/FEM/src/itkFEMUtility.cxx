@@ -163,46 +163,6 @@ const double GaussIntegrate::w[110] =
   0.152753387130726
   };
 
-template <unsigned NDimension>
-MetaObject *InternalConvertSpatialObjectFEMMetaObject(void *objToConvert)
-{
-  typedef SpatialObject<NDimension> SpatialObjectType;
-
-  SpatialObjectType *so =
-    reinterpret_cast<SpatialObjectType *>(objToConvert);
-
-  typedef itk::FEMObjectSpatialObject<NDimension> FEMSOType;
-  FEMSOType * femSO = dynamic_cast<FEMSOType *>(so);
-  if(femSO != 0)
-    {
-    typedef itk::fem::FEMObject<NDimension> FEMObjectType;
-
-    MetaFEMObjectConverter<NDimension> converter;
-    MetaFEMObject            *fem =
-      converter.FEMObjectSpatialObjectToMetaFEMObject(femSO);
-    if(so->GetParent())
-      {
-      fem->ParentID(so->GetParent()->GetId());
-      }
-    fem->Name(so->GetProperty()->GetName().c_str());
-    return fem;
-    }
-  return 0;
-}
-
-MetaObject *
-ConvertFEMMetaObject(void *objToConvert)
-{
-  MetaObject *rval;
-  if((rval = InternalConvertSpatialObjectFEMMetaObject<2>(objToConvert)) == 0 &&
-     (rval = InternalConvertSpatialObjectFEMMetaObject<3>(objToConvert)) == 0
-     )
-    {
-    itkGenericExceptionMacro(<< "Can't convert MetaObject to FEMMetaObject");
-    }
-  return rval;
-}
-
 }  //end namespace fem
 
 }  // end namespace itk

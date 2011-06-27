@@ -58,7 +58,7 @@ public:
     m_Point(2), m_ForcePoint(2)
   {
     /** Default Initialization of 2D point and force vector */
-  }                                   
+  }
 
 /**
    * Set the point where the load acts

@@ -106,7 +106,7 @@ public:
   /**
    * Get/Set the Nodes that define the element
    */
-   
+
   virtual NodeIDType GetNode(unsigned int n) const
   {
     if( n >= NumberOfNodes )

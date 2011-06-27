@@ -22,8 +22,8 @@
 #include "itkFEMObjectSpatialObject.h"
 #include "itkGroupSpatialObject.h"
 #include "itkSpatialObject.h"
-#include "itkSpatialObjectReader.h"
-#include "itkSpatialObjectWriter.h"
+#include "itkFEMSpatialObjectReader.h"
+#include "itkFEMSpatialObjectWriter.h"
 #include "itkFEMFactoryBase.h"
 
 int itkFEMLoadBCMFCTestUser(int argc, char *argv[])
@@ -221,9 +221,9 @@ int itkFEMLoadBCMFCTestUser(int argc, char *argv[])
   /* typedef itk::FEMObjectSpatialObject<2>    FEMObjectSpatialObjectType;
    FEMObjectSpatialObjectType::Pointer femSODef = FEMObjectSpatialObjectType::New();
    femSODef->SetFEMObject(solver->GetOutput());
-   typedef itk::SpatialObjectWriter<2>    SpatialObjectWriterType;
-   typedef SpatialObjectWriterType::Pointer            SpatialObjectWriterPointer;
-   SpatialObjectWriterPointer SpatialWriter = SpatialObjectWriterType::New();
+   typedef itk::FEMSpatialObjectWriter<2>    FEMSpatialObjectWriterType;
+   typedef FEMSpatialObjectWriterType::Pointer            FEMSpatialObjectWriterPointer;
+   FEMSpatialObjectWriterPointer SpatialWriter = FEMSpatialObjectWriterType::New();
    SpatialWriter->SetInput(femSODef);
    SpatialWriter->SetFileName( argv[2] );
    SpatialWriter->Update();*/

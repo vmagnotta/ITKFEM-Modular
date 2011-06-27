@@ -84,27 +84,33 @@ void LoadBCMFC::AddRightHandSideTerm(Element::Float term)
   this->m_RightHandSide.put(this->m_RightHandSide.size() - 1, term);
 }
 
-int LoadBCMFC::GetNumberOfLeftHandSideTerms()
+int LoadBCMFC::GetNumberOfLeftHandSideTerms() const
 {
   return this->m_LeftHandSide.size();
 }
 
-int LoadBCMFC::GetNumberOfRightHandSideTerms()
+int LoadBCMFC::GetNumberOfRightHandSideTerms() const
 {
   return this->m_RightHandSide.size();
 }
 
-itk::fem::LoadBCMFC::MFCTerm LoadBCMFC::GetLeftHandSideTerm(int lhs)
+const LoadBCMFC::MFCTerm
+LoadBCMFC::
+GetLeftHandSideTerm(int lhs) const
 {
   return this->m_LeftHandSide.at(lhs);
 }
 
-Element::Float LoadBCMFC::GetRightHandSideTerm(int rhs)
+Element::Float LoadBCMFC::GetRightHandSideTerm(int rhs) const
 {
   return this->m_RightHandSide.get(rhs);
 }
 
-std::vector<itk::fem::LoadBCMFC::MFCTerm> & LoadBCMFC::GetLeftHandSideArray()
+const std::vector<LoadBCMFC::MFCTerm> & LoadBCMFC::GetLeftHandSideArray() const
+{
+  return this->m_LeftHandSide;
+}
+std::vector<LoadBCMFC::MFCTerm> & LoadBCMFC::GetLeftHandSideArray()
 {
   return this->m_LeftHandSide;
 }

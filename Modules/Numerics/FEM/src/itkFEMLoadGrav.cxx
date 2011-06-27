@@ -51,6 +51,11 @@ vnl_vector<itk::fem::Element::Float> & LoadGravConst::GetForce()
   return this->m_GravityForce;
 }
 
+const vnl_vector<itk::fem::Element::Float> & LoadGravConst::GetForce() const
+{
+  return this->m_GravityForce;
+}
+
 void LoadGravConst::ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe)
 {
   // Order of integration

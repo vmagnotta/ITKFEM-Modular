@@ -80,6 +80,7 @@ public:
 
   unsigned int GetNumberOfElements(void);
 
+  const std::vector<Element::ConstPointer> & GetElementArray() const;
   std::vector<Element::ConstPointer> & GetElementArray();
 
   /** Apply the load to the specified element */

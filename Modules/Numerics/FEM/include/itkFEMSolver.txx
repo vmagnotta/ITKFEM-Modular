@@ -259,7 +259,7 @@ void Solver<VDimension>::AssembleK()
       {
       l3->AssignToElement(m_FEMObject->GetElementContainer() );
       // dynamic_cast< LoadLandmark * >( &( *( *l2 ) ) ) )
-      Element::ConstPointer ep = const_cast<Element *>( l3->GetElement(0).GetPointer() );
+      Element::ConstPointer ep = l3->GetElement(0).GetPointer();
       this->AssembleLandmarkContribution( ep, l3->GetEta() );
       }
     }

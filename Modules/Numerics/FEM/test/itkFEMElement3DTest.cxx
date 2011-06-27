@@ -24,8 +24,8 @@
 #include "itkFEMObjectSpatialObject.h"
 #include "itkGroupSpatialObject.h"
 #include "itkSpatialObject.h"
-#include "itkSpatialObjectReader.h"
-#include "itkSpatialObjectWriter.h"
+#include "itkFEMSpatialObjectReader.h"
+#include "itkFEMSpatialObjectWriter.h"
 #include "itkFEMLinearSystemWrapper.h"
 #include "itkFEMLinearSystemWrapperDenseVNL.h"
 #include "itkFEMLinearSystemWrapperItpack.h"
@@ -53,13 +53,13 @@ int itkFEMElement3DTest(int argc, char *argv[])
   // Solvers being tested
   int numsolvers = 3;
 
-  typedef itk::SpatialObjectReader<3>      SpatialObjectReaderType;
-  typedef SpatialObjectReaderType::Pointer SpatialObjectReaderPointer;
-  SpatialObjectReaderPointer SpatialReader = SpatialObjectReaderType::New();
+  typedef itk::FEMSpatialObjectReader<3>      FEMSpatialObjectReaderType;
+  typedef FEMSpatialObjectReaderType::Pointer FEMSpatialObjectReaderPointer;
+  FEMSpatialObjectReaderPointer SpatialReader = FEMSpatialObjectReaderType::New();
   SpatialReader->SetFileName( argv[1] );
   SpatialReader->Update();
 
-  SpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
+  FEMSpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
 
   std::cout << "Scene Test: ";
   if( !myScene )

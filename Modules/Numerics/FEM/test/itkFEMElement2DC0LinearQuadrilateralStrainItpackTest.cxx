@@ -23,8 +23,8 @@
 #include "itkFEMObjectSpatialObject.h"
 #include "itkGroupSpatialObject.h"
 #include "itkSpatialObject.h"
-#include "itkSpatialObjectReader.h"
-#include "itkSpatialObjectWriter.h"
+#include "itkFEMSpatialObjectReader.h"
+#include "itkFEMSpatialObjectWriter.h"
 
 int itkFEMElement2DC0LinearQuadrilateralStrainItpackTest(int argc, char *argv[])
 {
@@ -41,13 +41,13 @@ int itkFEMElement2DC0LinearQuadrilateralStrainItpackTest(int argc, char *argv[])
   typedef SpatialObjectType::Pointer SpatialObjectPointer;
   SpatialObjectPointer Spatial = SpatialObjectType::New();
 
-  typedef itk::SpatialObjectReader<2>      SpatialObjectReaderType;
-  typedef SpatialObjectReaderType::Pointer SpatialObjectReaderPointer;
-  SpatialObjectReaderPointer SpatialReader = SpatialObjectReaderType::New();
+  typedef itk::FEMSpatialObjectReader<2>      FEMSpatialObjectReaderType;
+  typedef FEMSpatialObjectReaderType::Pointer FEMSpatialObjectReaderPointer;
+  FEMSpatialObjectReaderPointer SpatialReader = FEMSpatialObjectReaderType::New();
   SpatialReader->SetFileName( argv[1] );
   SpatialReader->Update();
 
-  SpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
+  FEMSpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
   if( !myScene )
     {
     std::cout << "No Scene : [FAILED]" << std::endl;
@@ -104,9 +104,9 @@ int itkFEMElement2DC0LinearQuadrilateralStrainItpackTest(int argc, char *argv[])
   // to write the deformed mesh
   FEMObjectSpatialObjectType::Pointer femSODef = FEMObjectSpatialObjectType::New();
   femSODef->SetFEMObject(solver->GetOutput() );
-  typedef itk::SpatialObjectWriter<2>      SpatialObjectWriterType;
-  typedef SpatialObjectWriterType::Pointer SpatialObjectWriterPointer;
-  SpatialObjectWriterPointer SpatialWriter = SpatialObjectWriterType::New();
+  typedef itk::FEMSpatialObjectWriter<2>      FEMSpatialObjectWriterType;
+  typedef FEMSpatialObjectWriterType::Pointer FEMSpatialObjectWriterPointer;
+  FEMSpatialObjectWriterPointer SpatialWriter = FEMSpatialObjectWriterType::New();
   SpatialWriter->SetInput(femSODef);
   SpatialWriter->SetFileName( argv[2] );
   SpatialWriter->Update();

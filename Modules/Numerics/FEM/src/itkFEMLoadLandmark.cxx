@@ -123,7 +123,7 @@ void LoadLandmark::SetEta(double e)
   this->m_Eta = e;
 }
 
-double LoadLandmark::GetEta()
+double LoadLandmark::GetEta() const
 {
   return this->m_Eta;
 }

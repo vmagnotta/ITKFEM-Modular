@@ -21,6 +21,7 @@
 
 #include "metaFEMObject.h"
 #include "itkFEMObjectSpatialObject.h"
+#include "itkMetaConverterBase.h"
 
 namespace itk
 {
@@ -38,33 +39,51 @@ namespace itk
  * \sa FEMObject FEMObjectSpatialObject
  */
 
-template <unsigned int NDimensions = 3>
-class ITK_EXPORT MetaFEMObjectConverter
+template< unsigned int NDimensions = 3 >
+class ITK_EXPORT MetaFEMObjectConverter :
+    public MetaConverterBase< NDimensions >
 {
-
 public:
+  /** Standard class typedefs */
+  typedef MetaFEMObjectConverter           Self;
+  typedef MetaConverterBase< NDimensions > Superclass;
+  typedef SmartPointer< Self >             Pointer;
+  typedef SmartPointer< const Self >       ConstPointer;
+
+  /** Method for creation through the object factory. */
+  itkNewMacro(Self);
+
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(MetaFEMObjectConverter, MetaConverterBase);
+
+  typedef typename Superclass::SpatialObjectType SpatialObjectType;
+  typedef typename SpatialObjectType::Pointer    SpatialObjectPointer;
+  typedef typename Superclass::MetaObjectType    MetaObjectType;
+
+  /** Specific class types for conversion */
+  typedef FEMObjectSpatialObject<NDimensions>               FEMObjectSpatialObjectType;
+  typedef typename FEMObjectSpatialObjectType::Pointer      FEMObjectSpatialObjectPointer;
+  typedef typename FEMObjectSpatialObjectType::ConstPointer FEMObjectSpatialObjectConstPointer;
+  typedef MetaFEMObject                                     FEMObjectMetaObjectType;
+
+  /** Convert the MetaObject to Spatial Object */
+  virtual SpatialObjectPointer MetaObjectToSpatialObject(const MetaObjectType *mo);
+
+  /** Convert the SpatialObject to MetaObject */
+  virtual MetaObjectType *SpatialObjectToMetaObject(const SpatialObjectType *spatialObject);
+
+protected:
+  /** Create the specific MetaObject for this class */
+  virtual MetaObjectType *CreateMetaObject();
 
   MetaFEMObjectConverter();
-  ~MetaFEMObjectConverter() {};
+  ~MetaFEMObjectConverter() {}
 
-  typedef itk::FEMObjectSpatialObject<NDimensions>  SpatialObjectType;
-
-  typedef typename SpatialObjectType::Pointer       SpatialObjectPointer;
-
-  /** Read the objct from the Meta File Format */
-  SpatialObjectPointer ReadMeta(const char* name);
-
-  /** Write the objct into the Meta File Format */
-  bool WriteMeta(SpatialObjectType* spatialObject,const char* name);
-
-  /** Convert from a MetaObject into a FEMSpatialObject */
-  SpatialObjectPointer MetaFEMObjectToFEMObjectSpatialObject(MetaFEMObject * femobject);
-
-  /** Convert from a FEMSpatialObject into a MetaObject */
-  MetaFEMObject* FEMObjectSpatialObjectToMetaFEMObject(SpatialObjectType * spatialObject);
+private:
+  MetaFEMObjectConverter(const Self &);   //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 };
-
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION

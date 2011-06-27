@@ -23,8 +23,8 @@
 #include "itkFEMObjectSpatialObject.h"
 #include "itkGroupSpatialObject.h"
 #include "itkSpatialObject.h"
-#include "itkSpatialObjectReader.h"
-#include "itkSpatialObjectWriter.h"
+#include "itkFEMSpatialObjectReader.h"
+#include "itkFEMSpatialObjectWriter.h"
 #include "itkFEMFactoryBase.h"
 
 int itkFEMElement2DC0LinearQuadrilateralStressTest(int argc, char *argv[])
@@ -163,9 +163,9 @@ int itkFEMElement2DC0LinearQuadrilateralStressTest(int argc, char *argv[])
   FEMObjectSpatialObjectType::Pointer femSODef = FEMObjectSpatialObjectType::New();
   femSODef->SetFEMObject(solver->GetOutput() );
 
-  typedef itk::SpatialObjectWriter<Dimension> SpatialObjectWriterType;
-  typedef SpatialObjectWriterType::Pointer    SpatialObjectWriterPointer;
-  SpatialObjectWriterPointer SpatialWriter = SpatialObjectWriterType::New();
+  typedef itk::FEMSpatialObjectWriter<Dimension> FEMSpatialObjectWriterType;
+  typedef FEMSpatialObjectWriterType::Pointer    FEMSpatialObjectWriterPointer;
+  FEMSpatialObjectWriterPointer SpatialWriter = FEMSpatialObjectWriterType::New();
   SpatialWriter->SetInput(femSODef);
   SpatialWriter->SetFileName( argv[1] );
   SpatialWriter->Update();

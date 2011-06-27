@@ -59,6 +59,11 @@ std::vector<Element::ConstPointer> & LoadElement::GetElementArray()
   return this->m_Element;
 }
 
+const std::vector<Element::ConstPointer> & LoadElement::GetElementArray() const
+{
+  return this->m_Element;
+}
+
 void LoadElement::PrintSelf(std::ostream& os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);

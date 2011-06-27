@@ -22,8 +22,8 @@
 #include "itkFEMObjectSpatialObject.h"
 #include "itkGroupSpatialObject.h"
 #include "itkSpatialObject.h"
-#include "itkSpatialObjectReader.h"
-#include "itkSpatialObjectWriter.h"
+#include "itkFEMSpatialObjectReader.h"
+#include "itkFEMSpatialObjectWriter.h"
 
 int itkFEMSolverTest3D(int argc, char *argv[])
 {
@@ -40,14 +40,14 @@ int itkFEMSolverTest3D(int argc, char *argv[])
   typedef SpatialObjectType::Pointer SpatialObjectPointer;
   SpatialObjectPointer Spatial = SpatialObjectType::New();
 
-  typedef itk::SpatialObjectReader<3>      SpatialObjectReaderType;
-  typedef SpatialObjectReaderType::Pointer SpatialObjectReaderPointer;
-  SpatialObjectReaderPointer SpatialReader = SpatialObjectReaderType::New();
+  typedef itk::FEMSpatialObjectReader<3>      FEMSpatialObjectReaderType;
+  typedef FEMSpatialObjectReaderType::Pointer FEMSpatialObjectReaderPointer;
+  FEMSpatialObjectReaderPointer SpatialReader = FEMSpatialObjectReaderType::New();
   SpatialReader->SetFileName( argv[1] );
 //  SpatialReader->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/3DC0LinearHexahedronMembraneTest.meta");
   SpatialReader->Update();
 
-  SpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
+  FEMSpatialObjectReaderType::ScenePointer myScene = SpatialReader->GetScene();
   if( !myScene )
     {
     std::cout << "No Scene : [FAILED]" << std::endl;
@@ -100,9 +100,9 @@ int itkFEMSolverTest3D(int argc, char *argv[])
   // to write the deformed mesh
   FEMObjectSpatialObjectType::Pointer femSODef = FEMObjectSpatialObjectType::New();
   femSODef->SetFEMObject(solver->GetOutput() );
-  typedef itk::SpatialObjectWriter<3>      SpatialObjectWriterType;
-  typedef SpatialObjectWriterType::Pointer SpatialObjectWriterPointer;
-  SpatialObjectWriterPointer SpatialWriter = SpatialObjectWriterType::New();
+  typedef itk::FEMSpatialObjectWriter<3>      FEMSpatialObjectWriterType;
+  typedef FEMSpatialObjectWriterType::Pointer FEMSpatialObjectWriterPointer;
+  FEMSpatialObjectWriterPointer SpatialWriter = FEMSpatialObjectWriterType::New();
   SpatialWriter->SetInput(femSODef);
   SpatialWriter->SetFileName( argv[2] );
 //  SpatialWriter->SetFileName("C:/Research/ITKGit/ITK/Testing/Data/Input/FEM/3DC0LinearHexahedronMembraneTestWrite.meta");
