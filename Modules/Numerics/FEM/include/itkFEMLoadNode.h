@@ -62,7 +62,7 @@ public:
   /**
   * Get the force acting at the node
   */
-  vnl_vector<Float> GetForce();
+  const vnl_vector<Float> GetForce() const;
 
   // void SetElement(Element::ConstPointer pointer);
 
@@ -70,7 +70,7 @@ public:
   * Get the element containing the degree of freedom
   * on which the force is being applied.
   */
-  Element::ConstPointer GetElement();
+  Element::ConstPointer GetElement() const;
 
   /**
    * Get the element containing the degree of freedom
@@ -86,7 +86,7 @@ public:
   /**
    * Get the node number on which the load is being applied.
    */
-  int GetNode();
+  int GetNode() const;
 
   LoadNode() : m_Element(0)
   {

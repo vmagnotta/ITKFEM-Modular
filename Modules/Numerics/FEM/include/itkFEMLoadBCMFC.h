@@ -78,7 +78,7 @@ public:
    */
   class MFCTerm
   {
-public:
+  public:
     /**
      * Pointer to element, which holds the DOF that is affected by MFC
      */
@@ -138,19 +138,20 @@ public:
   void AddRightHandSideTerm(Element::Float term);
 
   /** Returns the number of terms used to define the left hand side*/
-  int GetNumberOfLeftHandSideTerms();
+  int GetNumberOfLeftHandSideTerms() const;
 
   /** Returns the number of terms used to define the right hand side*/
-  int GetNumberOfRightHandSideTerms();
+  int GetNumberOfRightHandSideTerms() const;
 
   /** Returns the specified left hand side term*/
-  itk::fem::LoadBCMFC::MFCTerm GetLeftHandSideTerm(int lhs);
+  const MFCTerm GetLeftHandSideTerm(int lhs) const;
 
   /** Returns the number of terms used to define the right hand side*/
-  Element::Float GetRightHandSideTerm(int rhs);
+  Element::Float GetRightHandSideTerm(int rhs) const;
 
   /** Returns the array containing the left hand side boundary condition
     values*/
+  const std::vector<MFCTerm> & GetLeftHandSideArray() const;
   std::vector<MFCTerm> & GetLeftHandSideArray();
 
   /** Returns the array containing the right hand side boundary condition

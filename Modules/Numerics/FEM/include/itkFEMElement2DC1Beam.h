@@ -70,7 +70,7 @@ public:
   /*
    * Methods related to the physics of the problem.
    */
- 
+
   /** Get the Stiffness matrix */
   virtual void GetStiffnessMatrix(MatrixType & Ke) const;
 
@@ -81,7 +81,7 @@ public:
   virtual void GetStrainDisplacementMatrix(MatrixType &, const MatrixType &) const
   {
   }
-  
+
   /** Get the Material matrix */
   virtual void GetMaterialMatrix(MatrixType &) const
   {
@@ -93,7 +93,7 @@ public:
    */
 
   enum { DefaultIntegrationOrder = 1 };
-  
+
   /** Get the Integration point and weight */
   virtual void GetIntegrationPointAndWeight(unsigned int i, VectorType & pt, Float & w, unsigned int order = 0) const;
 
@@ -103,7 +103,7 @@ public:
   /**
    * Methods related to the geometry of an element
    */
-   
+
   /** Return the shape functions used to interpolate across the element */
   virtual VectorType ShapeFunctions(const VectorType & pt) const;
 

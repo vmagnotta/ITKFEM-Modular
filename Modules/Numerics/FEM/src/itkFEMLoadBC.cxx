@@ -45,7 +45,7 @@ void LoadBC::SetDegreeOfFreedom(int dof)
   this->m_DegreeOfFreedom = dof;
 }
 
-int LoadBC::GetDegreeOfFreedom()
+int LoadBC::GetDegreeOfFreedom() const
 {
   return this->m_DegreeOfFreedom;
 }
@@ -55,7 +55,7 @@ void LoadBC::SetValue(const vnl_vector<Element::Float> val)
   this->m_Value = val;
 }
 
-vnl_vector<Element::Float> LoadBC::GetValue()
+const vnl_vector<Element::Float> LoadBC::GetValue() const
 {
   return this->m_Value;
 }
@@ -65,7 +65,7 @@ void LoadBC::SetElement(Element::ConstPointer element)
   this->m_Element = element;
 }
 
-Element::ConstPointer LoadBC::GetElement()
+Element::ConstPointer LoadBC::GetElement() const
 {
   return this->m_Element;
 }

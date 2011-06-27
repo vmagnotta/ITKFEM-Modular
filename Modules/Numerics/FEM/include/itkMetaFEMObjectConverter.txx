@@ -25,7 +25,6 @@
 #include "itkFEMMaterialLinearElasticity.h"
 #include "itkFEMLoadEdge.h"
 #include "itkFEMLoadGrav.h"
-#include "itkFEMFactoryBase.h"
 #include "itkObjectFactoryBase.h"
 
 namespace itk
@@ -36,26 +35,39 @@ template <unsigned int NDimensions>
 MetaFEMObjectConverter<NDimensions>
 ::MetaFEMObjectConverter()
 {
-  itk::FEMFactoryBase::RegisterDefaultTypes();
+}
+
+template< unsigned int NDimensions >
+typename MetaFEMObjectConverter< NDimensions >::MetaObjectType *
+MetaFEMObjectConverter< NDimensions>
+::CreateMetaObject()
+{
+  return dynamic_cast<MetaObjectType *>(new FEMObjectMetaObjectType);
 }
 
 /** Convert a metaFEMObject into an FEMObject SpatialObject  */
 template <unsigned int NDimensions>
 typename MetaFEMObjectConverter<NDimensions>::SpatialObjectPointer
 MetaFEMObjectConverter<NDimensions>
-::MetaFEMObjectToFEMObjectSpatialObject(MetaFEMObject * femobject)
+::MetaObjectToSpatialObject(const MetaObjectType * mo)
 {
-  SpatialObjectPointer spatialObject = SpatialObjectType::New();
-  typedef itk::fem::FEMObject<NDimensions>  FEMObjectType;
+  const MetaFEMObject *FEMmo = dynamic_cast<const MetaFEMObject *>(mo);
+  if(FEMmo == 0)
+    {
+    itkExceptionMacro(<< "Can't convert MetaObject to MetaFEMObject");
+    }
 
-  typedef typename FEMObjectType::Pointer     FEMObjectPointer;
+  FEMObjectSpatialObjectPointer FEMSO = FEMObjectSpatialObjectType::New();
+
+  typedef itk::fem::FEMObject<NDimensions>  FEMObjectType;
+  typedef typename FEMObjectType::Pointer   FEMObjectPointer;
 
   FEMObjectPointer myFEMObject = FEMObjectType::New();
   itk::LightObject::Pointer a = 0;
 
   // copy all the node information
   typedef typename MetaFEMObject::NodeListType NodeListType;
-  const NodeListType nodelist = femobject->GetNodeList();
+  const NodeListType nodelist = FEMmo->GetNodeList();
 
   typename NodeListType::const_iterator it_nodes = nodelist.begin();
 
@@ -83,7 +95,7 @@ MetaFEMObjectConverter<NDimensions>
    // material property type. other types could be added in the
    // future.
   typedef typename MetaFEMObject::MaterialListType MaterialListType;
-  const MaterialListType materiallist = femobject->GetMaterialList();
+  const MaterialListType materiallist = FEMmo->GetMaterialList();
 
   typename MaterialListType::const_iterator it_material = materiallist.begin();
 
@@ -107,7 +119,7 @@ MetaFEMObjectConverter<NDimensions>
 
     // copy all the Element information
   typedef typename MetaFEMObject::ElementListType ElementListType;
-  const ElementListType elementlist = femobject->GetElementList();
+  const ElementListType elementlist = FEMmo->GetElementList();
 
   typename ElementListType::const_iterator it_elements = elementlist.begin();
 
@@ -130,7 +142,7 @@ MetaFEMObjectConverter<NDimensions>
 
     // copy all the load and boundary condition information
   typedef typename MetaFEMObject::LoadListType LoadListType;
-  const LoadListType loadlist = femobject->GetLoadList();
+  const LoadListType loadlist = FEMmo->GetLoadList();
 
   typename LoadListType::const_iterator it_load = loadlist.begin();
 
@@ -196,15 +208,14 @@ MetaFEMObjectConverter<NDimensions>
 
   for ( int i = 0; i < NumLHS; i++ )
     {
-    FEMObjectMFCTerm *mfcTerm = dynamic_cast< FEMObjectMFCTerm * > (&*load->m_LHS[i]);
+    FEMObjectMFCTerm *mfcTerm =
+      dynamic_cast< FEMObjectMFCTerm * > (&*load->m_LHS[i]);
     elementGN = mfcTerm->m_ElementGN;
 
     DOF = mfcTerm->m_DOF;
 
     Value = mfcTerm->m_Value;
-
-    o1->GetLeftHandSideArray().push_back(
-    itk::fem::LoadBCMFC::MFCTerm(&*myFEMObject->GetElementWithGlobalNumber(elementGN), DOF, Value) );
+    o1->GetLeftHandSideArray().push_back(fem::LoadBCMFC::MFCTerm(&*myFEMObject->GetElementWithGlobalNumber(elementGN), DOF, Value) );
     }
 
   int NumRHS = load->m_NumRHS;
@@ -324,32 +335,39 @@ MetaFEMObjectConverter<NDimensions>
     it_load++;
   }
 
-  spatialObject->SetFEMObject(myFEMObject);
+  FEMSO->SetFEMObject(myFEMObject);
 
-  return spatialObject;
+  return FEMSO.GetPointer();
 }
 
 /** Convert an FEMObject SpatialObject into a metaFEMObject */
 template <unsigned int NDimensions>
-MetaFEMObject*
+typename MetaFEMObjectConverter<NDimensions>::MetaObjectType *
 MetaFEMObjectConverter<NDimensions>
-::FEMObjectSpatialObjectToMetaFEMObject(SpatialObjectType * spatialObject)
+::SpatialObjectToMetaObject(const SpatialObjectType * so)
 {
-  typedef itk::fem::FEMObject<NDimensions>  FEMObjectType;
-  typedef typename FEMObjectType::Pointer   FEMObjectPointer;
+  FEMObjectSpatialObjectConstPointer FEMSO =
+    dynamic_cast<const FEMObjectSpatialObjectType *>(so);
+  if(FEMSO.IsNull())
+    {
+    itkExceptionMacro(<< "Can't downcast SpatialObject to FEMObjectSpatialObject");
+    }
 
-  FEMObjectPointer SOFEMObject = spatialObject->GetFEMObject();
+  typedef itk::fem::FEMObject<NDimensions>     FEMObjectType;
+  typedef typename FEMObjectType::ConstPointer FEMObjectConstPointer;
 
-  MetaFEMObject* FEMObject = new MetaFEMObject(NDimensions);
+  FEMObjectConstPointer curFEMObject = FEMSO->GetFEMObject();
+
+  FEMObjectMetaObjectType * FEMmo = new MetaFEMObject(NDimensions);
 
   // copy the relevant info from spatial object to femobject
 
   // copy node info.
-  const int numSONodes = SOFEMObject->GetNumberOfNodes();
+  const int numSONodes = curFEMObject->GetNumberOfNodes();
   for (int i=0; i<numSONodes; i++)
   {
   FEMObjectNode *Node = new FEMObjectNode(NDimensions);
-  itk::fem::Node::Pointer SONode = SOFEMObject->GetNode(i);
+  itk::fem::Node::ConstPointer SONode = curFEMObject->GetNode(i);
   itk::fem::Element::VectorType pt = SONode->GetCoordinates();
 
   Node->m_GN = SONode->GetGlobalNumber();
@@ -357,14 +375,14 @@ MetaFEMObjectConverter<NDimensions>
   {
     Node->m_X[j] = pt[j];
   }
-  FEMObject->GetNodeList().push_back(Node);
+  FEMmo->GetNodeList().push_back(Node);
   }
 
    // copy material info.
-   int numMaterial = SOFEMObject->GetNumberOfMaterials();
+   int numMaterial = curFEMObject->GetNumberOfMaterials();
    for (int i=0; i<numMaterial; i++)
    {
-     itk::fem::Material::Pointer SOMaterial = SOFEMObject->GetMaterial(i);
+     itk::fem::Material::ConstPointer SOMaterial = curFEMObject->GetMaterial(i);
   FEMObjectMaterial *Material = new FEMObjectMaterial;
 
   // check for the material type
@@ -372,8 +390,8 @@ MetaFEMObjectConverter<NDimensions>
   if(mat_name == "MaterialLinearElasticity")
   {
       strcpy(Material->m_MaterialName, mat_name.c_str());
-    itk::fem::MaterialLinearElasticity::Pointer SOMaterialCast =
-    dynamic_cast< itk::fem::MaterialLinearElasticity * >( &*SOMaterial );
+    itk::fem::MaterialLinearElasticity::ConstPointer SOMaterialCast =
+    dynamic_cast<const itk::fem::MaterialLinearElasticity * >( &*SOMaterial );
 
     Material->m_GN = SOMaterialCast->GetGlobalNumber();
     Material->E = SOMaterialCast->GetYoungsModulus();
@@ -382,15 +400,15 @@ MetaFEMObjectConverter<NDimensions>
     Material->nu = SOMaterialCast->GetPoissonsRatio();
     Material->h = SOMaterialCast->GetThickness();
     Material->RhoC = SOMaterialCast->GetDensityHeatProduct();
-    FEMObject->GetMaterialList().push_back(Material);
+    FEMmo->GetMaterialList().push_back(Material);
   }
    }
 
    // copy element info.
-  const int numElements = SOFEMObject->GetNumberOfElements();
+  const int numElements = curFEMObject->GetNumberOfElements();
   for (int i=0; i<numElements; i++)
   {
-    itk::fem::Element::Pointer SOElement = SOFEMObject->GetElement(i);
+    itk::fem::Element::ConstPointer SOElement = curFEMObject->GetElement(i);
     const int numNodes = SOElement->GetNumberOfNodes();
   FEMObjectElement *Element = new FEMObjectElement(numNodes);
 
@@ -405,14 +423,14 @@ MetaFEMObjectConverter<NDimensions>
   {
     Element->m_NodesId[j] = SOElement->GetNode(j)->GetGlobalNumber();
   }
-  FEMObject->GetElementList().push_back(Element);
+  FEMmo->GetElementList().push_back(Element);
   }
 
   // copy load/bc info.
-    int numLoads = SOFEMObject->GetNumberOfLoads();
+    int numLoads = curFEMObject->GetNumberOfLoads();
    for (int ll=0; ll<numLoads; ++ll)
      {
-     itk::fem::Load::Pointer SOLoad = SOFEMObject->GetLoad(ll);
+     itk::fem::Load::ConstPointer SOLoad = curFEMObject->GetLoad(ll);
      FEMObjectLoad *Load = new FEMObjectLoad;
 
      // check for the load/bc type
@@ -420,8 +438,8 @@ MetaFEMObjectConverter<NDimensions>
      strcpy(Load->m_LoadName, load_name.c_str());
      if(load_name == "LoadNode")
        {
-       itk::fem::LoadNode::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadNode * >( &*SOLoad );
+       itk::fem::LoadNode::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadNode * >( &*SOLoad );
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
        Load->m_ElementGN = SOLoadCast->GetElement()->GetGlobalNumber();
@@ -434,13 +452,13 @@ MetaFEMObjectConverter<NDimensions>
          {
          Load->m_ForceVector[j] = SOLoadCast->GetForce()[j];
          }
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
 
      if(load_name == "LoadBC")
        {
-       itk::fem::LoadBC::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadBC * >( &*SOLoad );
+       itk::fem::LoadBC::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadBC * >( &*SOLoad );
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
        Load->m_DOF = SOLoadCast->GetDegreeOfFreedom();
@@ -453,7 +471,7 @@ MetaFEMObjectConverter<NDimensions>
          {
          Load->m_RHS[j] = SOLoadCast->GetValue()[j];
          }
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
 
      if(load_name == "LoadBCMFC")
@@ -462,8 +480,8 @@ MetaFEMObjectConverter<NDimensions>
        int DOF;
        float Value;
 
-       itk::fem::LoadBCMFC::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadBCMFC * >( &*SOLoad );
+       itk::fem::LoadBCMFC::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadBCMFC * >( &*SOLoad );
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
 
@@ -492,13 +510,13 @@ MetaFEMObjectConverter<NDimensions>
          {
          Load->m_RHS[i] = SOLoadCast->GetRightHandSideTerm(i);
          }
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
 
      if(load_name == "LoadEdge")
        {
-       itk::fem::LoadEdge::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadEdge * >( &*SOLoad );
+       itk::fem::LoadEdge::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadEdge * >( &*SOLoad );
 
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
@@ -520,13 +538,13 @@ MetaFEMObjectConverter<NDimensions>
            }
          Load->m_ForceMatrix.push_back(F);
          }
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
 
      if(load_name == "LoadGravConst")
        {
-       itk::fem::LoadGravConst::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadGravConst * >( &*SOLoad );
+       itk::fem::LoadGravConst::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadGravConst * >( &*SOLoad );
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
 
@@ -544,13 +562,13 @@ MetaFEMObjectConverter<NDimensions>
          Load->m_ForceVector.push_back(SOLoadCast->GetForce()[i]);
          }
 
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
 
      if(load_name == "LoadLandmark")
        {
-       itk::fem::LoadLandmark::Pointer SOLoadCast =
-         dynamic_cast< itk::fem::LoadLandmark * >( &*SOLoad );
+       itk::fem::LoadLandmark::ConstPointer SOLoadCast =
+         dynamic_cast<const itk::fem::LoadLandmark * >( &*SOLoad );
 
        Load->m_GN = SOLoadCast->GetGlobalNumber();
 
@@ -566,45 +584,12 @@ MetaFEMObjectConverter<NDimensions>
          Load->m_Deformed[i] = SOLoadCast->GetSource()[i];
          Load->m_Undeformed[i] = SOLoadCast->GetTarget()[i];
          }
-       FEMObject->GetLoadList().push_back(Load);
+       FEMmo->GetLoadList().push_back(Load);
        }
      }
-  FEMObject->ID(spatialObject->GetId());
-  if(spatialObject->GetParent())
-    {
-    FEMObject->ParentID(spatialObject->GetParent()->GetId());
-    }
-  return FEMObject;
+  return FEMmo;
 }
 
-
-/** Read a meta file give the type */
-template <unsigned int NDimensions>
-typename MetaFEMObjectConverter<NDimensions>::SpatialObjectPointer
-MetaFEMObjectConverter<NDimensions>
-::ReadMeta(const char* name)
-{
-  SpatialObjectPointer spatialObject;
-  MetaFEMObject* FEMObject = new MetaFEMObject();
-  FEMObject->Read(name);
-  FEMObject->PrintInfo();
-
-  spatialObject = MetaFEMObjectToFEMObjectSpatialObject(FEMObject);
-
-  return spatialObject;
-}
-
-
-/** Write a meta FEMObject file */
-template <unsigned int NDimensions>
-bool
-MetaFEMObjectConverter<NDimensions>
-::WriteMeta(SpatialObjectType* spatialObject,const char* name)
-{
-  MetaFEMObject* FEMObject = FEMObjectSpatialObjectToMetaFEMObject(spatialObject);
-  FEMObject->Write(name);
-  return true;
-}
 
 } // end namespace itk
 

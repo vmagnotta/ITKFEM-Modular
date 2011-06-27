@@ -46,7 +46,8 @@ namespace fem
  * Default constructor for FEMObject class
  */
 template <unsigned int VDimension>
-FEMObject<VDimension>::FEMObject()
+FEMObject<VDimension>
+::FEMObject()
 {
   m_NGFN = 0;
   m_NMFC = 0;
@@ -57,13 +58,16 @@ FEMObject<VDimension>::FEMObject()
 }
 
 template <unsigned int VDimension>
-FEMObject<VDimension>::~FEMObject()
+FEMObject<VDimension>
+::~FEMObject()
 {
 
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::Clear()
+void
+FEMObject<VDimension>
+::Clear()
 {
   this->m_NodeContainer->Initialize();
   this->m_ElementContainer->Initialize();
@@ -75,7 +79,9 @@ void FEMObject<VDimension>::Clear()
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::DeepCopy( FEMObject *Copy)
+void
+FEMObject<VDimension>
+::DeepCopy( FEMObject *Copy)
 {
   this->Clear();
 
@@ -293,7 +299,9 @@ out:
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::FinalizeMesh()
+void
+FEMObject<VDimension>
+::FinalizeMesh()
 {
   this->GenerateGFN();
   this->GenerateMFC();
@@ -303,7 +311,9 @@ void FEMObject<VDimension>::FinalizeMesh()
  * Assign a global freedom number to each DOF in a system.
  */
 template <unsigned int VDimension>
-void FEMObject<VDimension>::GenerateMFC()
+void
+FEMObject<VDimension>
+::GenerateMFC()
 {
   if( m_NGFN <= 0 )
     {
@@ -337,7 +347,9 @@ void FEMObject<VDimension>::GenerateMFC()
  * Assign a global freedom number to each DOF in a system.
  */
 template <unsigned int VDimension>
-void FEMObject<VDimension>::GenerateGFN()
+void
+FEMObject<VDimension>
+::GenerateGFN()
 {
   // Clear the list of elements and global freedom numbers in nodes
   // FIXME: should be removed once Mesh is there
@@ -398,7 +410,9 @@ void FEMObject<VDimension>::GenerateGFN()
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::RenumberNodeContainer()
+void
+FEMObject<VDimension>
+::RenumberNodeContainer()
 {
 
   int numNodes = this->m_NodeContainer->Size();
@@ -409,7 +423,9 @@ void FEMObject<VDimension>::RenumberNodeContainer()
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::AddNextElement(Element::Pointer e)
+void
+FEMObject<VDimension>
+::AddNextElement(Element::Pointer e)
 {
   ElementIdentifier size = this->m_ElementContainer->Size();
 
@@ -417,13 +433,17 @@ void FEMObject<VDimension>::AddNextElement(Element::Pointer e)
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::InsertElement(Element::Pointer e, ElementIdentifier index)
+void
+FEMObject<VDimension>
+::InsertElement(Element::Pointer e, ElementIdentifier index)
 {
   this->m_ElementContainer->InsertElement(index, e);
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::AddNextNode(Node::Pointer e)
+void
+FEMObject<VDimension>
+::AddNextNode(Node::Pointer e)
 {
   NodeIdentifier size = this->m_NodeContainer->Size();
 
@@ -431,13 +451,17 @@ void FEMObject<VDimension>::AddNextNode(Node::Pointer e)
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::InsertNode(Node::Pointer e, NodeIdentifier index)
+void
+FEMObject<VDimension>
+::InsertNode(Node::Pointer e, NodeIdentifier index)
 {
   this->m_NodeContainer->InsertElement(index, e);
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::AddNextMaterial(Material::Pointer e)
+void
+FEMObject<VDimension>
+::AddNextMaterial(Material::Pointer e)
 {
   MaterialIdentifier size = this->m_MaterialContainer->Size();
 
@@ -445,13 +469,17 @@ void FEMObject<VDimension>::AddNextMaterial(Material::Pointer e)
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::InsertMaterial(Material::Pointer e, MaterialIdentifier index)
+void
+FEMObject<VDimension>
+::InsertMaterial(Material::Pointer e, MaterialIdentifier index)
 {
   this->m_MaterialContainer->InsertElement(index, e);
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::AddNextLoad(Load::Pointer e)
+void
+FEMObject<VDimension>
+::AddNextLoad(Load::Pointer e)
 {
   LoadIdentifier size = this->m_LoadContainer->Size();
 
@@ -459,39 +487,73 @@ void FEMObject<VDimension>::AddNextLoad(Load::Pointer e)
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>::InsertLoad(Load::Pointer e, LoadIdentifier index)
+void
+FEMObject<VDimension>
+::InsertLoad(Load::Pointer e, LoadIdentifier index)
 {
   this->m_LoadContainer->InsertElement(index, e);
 }
 
 template <unsigned int VDimension>
-Element::Pointer FEMObject<VDimension>::GetElement(ElementIdentifier index)
+Element::ConstPointer
+FEMObject<VDimension>
+::GetElement(ElementIdentifier index) const
 {
-  return this->m_ElementContainer->GetElement(index);
+  return this->m_ElementContainer->GetElement(index).GetPointer();
 }
 
 template <unsigned int VDimension>
-Element::Pointer FEMObject<VDimension>::GetElementWithGlobalNumber(int globalNumber)
+Element::Pointer
+FEMObject<VDimension>
+::GetElement(ElementIdentifier index)
+{
+  return this->m_ElementContainer->GetElement(index).GetPointer();
+}
+
+template <unsigned int VDimension>
+Element::ConstPointer
+FEMObject<VDimension>
+::GetElementWithGlobalNumber(int globalNumber) const
 {
   int numElements = this->m_ElementContainer->Size();
   for( int i = 0; i < numElements; i++ )
     {
     if( this->m_ElementContainer->GetElement(i)->GetGlobalNumber() == globalNumber )
       {
-      return this->m_ElementContainer->GetElement(i);
+      return this->m_ElementContainer->GetElement(i).GetPointer();
       }
     }
   return NULL;
 }
 
 template <unsigned int VDimension>
-Node::Pointer FEMObject<VDimension>::GetNode(NodeIdentifier index)
+Element::Pointer
+FEMObject<VDimension>
+::GetElementWithGlobalNumber(int globalNumber)
 {
-  return this->m_NodeContainer->GetElement(index);
+  return const_cast<Element *>
+    (const_cast<const Self *>(this)->GetElementWithGlobalNumber(globalNumber).GetPointer());
 }
 
 template <unsigned int VDimension>
-Node::Pointer FEMObject<VDimension>::GetNodeWithGlobalNumber(int globalNumber)
+Node::ConstPointer
+FEMObject<VDimension>
+::GetNode(NodeIdentifier index) const
+{
+  return this->m_NodeContainer->GetElement(index).GetPointer();
+}
+template <unsigned int VDimension>
+Node::Pointer
+FEMObject<VDimension>
+::GetNode(NodeIdentifier index)
+{
+  return this->m_NodeContainer->GetElement(index).GetPointer();
+}
+
+template <unsigned int VDimension>
+Node::Pointer
+FEMObject<VDimension>
+::GetNodeWithGlobalNumber(int globalNumber)
 {
   int numNodes = this->m_NodeContainer->Size();
   for( int i = 0; i < numNodes; i++ )
@@ -505,13 +567,24 @@ Node::Pointer FEMObject<VDimension>::GetNodeWithGlobalNumber(int globalNumber)
 }
 
 template <unsigned int VDimension>
-Load::Pointer FEMObject<VDimension>::GetLoad(LoadIdentifier index)
+Load::ConstPointer
+FEMObject<VDimension>
+::GetLoad(LoadIdentifier index) const
+{
+  return this->m_LoadContainer->GetElement(index).GetPointer();
+}
+template <unsigned int VDimension>
+Load::Pointer
+FEMObject<VDimension>
+::GetLoad(LoadIdentifier index)
 {
   return this->m_LoadContainer->GetElement(index);
 }
 
 template <unsigned int VDimension>
-Load::Pointer FEMObject<VDimension>::GetLoadWithGlobalNumber(int globalNumber)
+Load::Pointer
+FEMObject<VDimension>
+::GetLoadWithGlobalNumber(int globalNumber)
 {
   int numLoads = this->m_LoadContainer->Size();
   for( int i = 0; i < numLoads; i++ )
@@ -525,27 +598,49 @@ Load::Pointer FEMObject<VDimension>::GetLoadWithGlobalNumber(int globalNumber)
 }
 
 template <unsigned int VDimension>
-Material::Pointer FEMObject<VDimension>::GetMaterial(MaterialIdentifier index)
+Material::ConstPointer
+FEMObject<VDimension>
+::GetMaterial(MaterialIdentifier index) const
 {
-  return this->m_MaterialContainer->GetElement(index);
+  return this->m_MaterialContainer->GetElement(index).GetPointer();
 }
 
 template <unsigned int VDimension>
-Material::Pointer FEMObject<VDimension>::GetMaterialWithGlobalNumber(int globalNumber)
+Material::Pointer
+FEMObject<VDimension>
+::GetMaterial(MaterialIdentifier index)
+{
+  return const_cast<Material *>(const_cast<const Self *>(this)->GetMaterial(index).GetPointer());
+}
+
+template <unsigned int VDimension>
+Material::ConstPointer
+FEMObject<VDimension>
+::GetMaterialWithGlobalNumber(int globalNumber) const
 {
   int numMaterials = this->m_MaterialContainer->Size();
   for( int i = 0; i < numMaterials; i++ )
     {
     if( this->m_MaterialContainer->GetElement(i)->GetGlobalNumber() == globalNumber )
       {
-      return this->m_MaterialContainer->GetElement(i);
+      return this->m_MaterialContainer->GetElement(i).GetPointer();
       }
     }
   return NULL;
 }
 
 template <unsigned int VDimension>
-void FEMObject<VDimension>
+Material::Pointer
+FEMObject<VDimension>
+::GetMaterialWithGlobalNumber(int globalNumber)
+{
+  return const_cast<Material *>
+    (const_cast<const Self *>(this)->GetMaterialWithGlobalNumber(globalNumber).GetPointer());
+}
+
+template <unsigned int VDimension>
+void
+FEMObject<VDimension>
 ::PrintSelf(std::ostream& os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);
