@@ -44,7 +44,7 @@ void LoadNode::SetNode(int num)
   this->m_Point = num;
 }
 
-int LoadNode::GetNode()
+int LoadNode::GetNode() const
 {
   return this->m_Point;
 }
@@ -54,12 +54,12 @@ void LoadNode::SetForce(const vnl_vector<Float> force)
   this->m_Force = force;
 }
 
-vnl_vector<itk::fem::Element::Float> LoadNode::GetForce()
+const vnl_vector<itk::fem::Element::Float> LoadNode::GetForce() const
 {
   return this->m_Force;
 }
 
-Element::ConstPointer LoadNode::GetElement()
+Element::ConstPointer LoadNode::GetElement() const
 {
   return this->m_Element;
 }

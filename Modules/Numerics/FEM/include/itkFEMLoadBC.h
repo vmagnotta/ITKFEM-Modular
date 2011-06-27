@@ -59,19 +59,19 @@ public:
   void SetDegreeOfFreedom(int dof);
 
   /** Get the number of degrees of freedom*/
-  int GetDegreeOfFreedom();
+  int GetDegreeOfFreedom() const;
 
   /** Set the boundary condition using vector representation*/
   void SetValue(const vnl_vector<Element::Float> val);
 
   /** Get the boundary condition as vector representation*/
-  vnl_vector<Element::Float> GetValue();
+  const vnl_vector<Element::Float> GetValue() const;
 
   /** Set the element on which the boundary condition is being applied*/
   void SetElement(Element::ConstPointer ele);
 
   /** Get the element on which the boundary condition is being applied*/
-  Element::ConstPointer GetElement();
+  Element::ConstPointer GetElement() const;
 
 protected:
   virtual void PrintSelf(std::ostream& os, Indent indent) const;

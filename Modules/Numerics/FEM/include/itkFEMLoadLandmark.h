@@ -94,7 +94,17 @@ public:
     return m_Source;
   }
 
+  const Element::VectorType & GetSource() const
+  {
+    return m_Source;
+  }
+
   Element::VectorType & GetForce()
+  {
+    return m_Force;
+  }
+
+  const Element::VectorType & GetForce() const
   {
     return m_Force;
   }
@@ -133,6 +143,10 @@ public:
    * Access the location of the point load
    */
   Element::VectorType & GetTarget()
+  {
+    return m_Target;
+  }
+  const Element::VectorType & GetTarget() const
   {
     return m_Target;
   }
@@ -181,7 +195,7 @@ public:
   /** Get/Set the eta parameter, square root of the variance, for the load */
   void SetEta(double e);
 
-  double GetEta();
+  double GetEta() const;
 
   /** Apply the load to the specified element */
   virtual void ApplyLoad(Element::ConstPointer element, Element::VectorType & Fe);

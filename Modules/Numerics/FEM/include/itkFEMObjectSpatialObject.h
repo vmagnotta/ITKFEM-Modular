@@ -61,7 +61,15 @@ public:
   void SetFEMObject( FEMObjectType * femobject );
 
   /** Get a pointer to the femobject currently attached to the object. */
-  FEMObjectType * GetFEMObject( void );
+  FEMObjectType * GetFEMObject( void )
+  {
+    return m_FEMObject.GetPointer();
+  }
+  const FEMObjectType * GetFEMObject( void ) const
+  {
+    return m_FEMObject.GetPointer();
+  }
+
 
   /** Returns the latest modified time of the object and its component. */
   unsigned long GetMTime( void ) const;

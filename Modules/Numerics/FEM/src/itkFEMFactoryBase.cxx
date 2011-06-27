@@ -64,26 +64,6 @@ FEMFactoryBase::~FEMFactoryBase()
 {
 }
 
-template<unsigned int NDimensions>
-typename itk::SpatialObject<NDimensions>::Pointer
-ConvertFEMMetaObjectToSpatialObjectPointer( MetaObject * objToConvert )
-{
-      MetaFEMObject * FEMobjToConvert=dynamic_cast<MetaFEMObject *>(objToConvert);
-      if( ! FEMobjToConvert )
-        {
-        std::cout <<  "ERROR:  Invalid Conversion to FEM!" << std::endl;
-        exit(-1); //HACK:  This is not good ITK programming.
-        }
-
-      MetaFEMObjectConverter<NDimensions> converter;
-      typename FEMObjectSpatialObject<NDimensions>::Pointer FEMso =
-          converter.MetaFEMObjectToFEMObjectSpatialObject(FEMobjToConvert);
-
-      typename itk::SpatialObject<NDimensions>::Pointer so(FEMso.GetPointer());
-     return so;
-}
-
-
 void FEMFactoryBase::RegisterDefaultTypes()
 {
   //if( m_Factory == 0 )
@@ -114,12 +94,6 @@ void FEMFactoryBase::RegisterDefaultTypes()
     FEMFactory<itk::fem::LoadGravConst>::RegisterType();
     FEMFactory<itk::fem::LoadElement>::RegisterType();
     FEMFactory<itk::fem::MaterialLinearElasticity>::RegisterType();
-    //
-    // register a converter for FEMObjectSpatialObjects
-    MetaObjectConverterFactory::RegisterConverter("FEMObjectSpatialObject",
-      ::itk::fem::ConvertFEMMetaObject);
-    SpatialObjectConverterFactory<2>::GetInstance()->RegisterConverter("FEMObject", ConvertFEMMetaObjectToSpatialObjectPointer<2> );
-    SpatialObjectConverterFactory<3>::GetInstance()->RegisterConverter("FEMObject", ConvertFEMMetaObjectToSpatialObjectPointer<3> );
     }
 }
 

@@ -54,15 +54,6 @@ FEMObjectSpatialObject< TDimension>
   m_FEMObject = femobject;
 }
 
-/** Get the femobject inside the spatial object */
-template< unsigned int TDimension>
-typename FEMObjectSpatialObject< TDimension >::FEMObjectType *
-FEMObjectSpatialObject< TDimension>
-::GetFEMObject( void )
-{
-  return m_FEMObject.GetPointer();
-}
-
 /** Print the object */
 template< unsigned int TDimension>
 void

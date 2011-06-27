@@ -131,37 +131,37 @@ public:
   itkGetObjectMacro(MaterialContainer, MaterialContainerType);
 
   /** Get the Degrees of Freedom for the FE model */
-  unsigned int GetNumberOfDegreesOfFreedom(void)
+  unsigned int GetNumberOfDegreesOfFreedom(void) const
   {
     return m_NGFN;
   }
 
   /** Get the Degrees of Freedom for the FE model */
-  unsigned int GetNumberOfMultiFreedomConstraints(void)
+  unsigned int GetNumberOfMultiFreedomConstraints(void) const
   {
     return m_NMFC;
   }
 
   /** Get the Number of nodes in the FE mesh */
-  unsigned int GetNumberOfNodes(void)
+  unsigned int GetNumberOfNodes(void) const
   {
     return m_NodeContainer->Size();
   }
 
   /** Get the Number of elements in the FE mesh */
-  unsigned int GetNumberOfElements(void)
+  unsigned int GetNumberOfElements(void) const
   {
     return m_ElementContainer->Size();
   }
 
   /** Get the Number of Loads in the FE problem */
-  unsigned int GetNumberOfLoads(void)
+  unsigned int GetNumberOfLoads(void) const
   {
     return m_LoadContainer->Size();
   }
 
   /** Get the Number of Materials in the FE problem */
-  unsigned int GetNumberOfMaterials(void)
+  unsigned int GetNumberOfMaterials(void) const
   {
     return m_MaterialContainer->Size();
   }
@@ -209,17 +209,20 @@ public:
   /**
    * Get the element at the specified index location
    */
+  Element::ConstPointer GetElement(ElementIdentifier index) const;
   Element::Pointer GetElement(ElementIdentifier index);
 
   /**
    * Get the element at with the specified global number
    */
+  Element::ConstPointer GetElementWithGlobalNumber(int globalNumber) const;
   Element::Pointer GetElementWithGlobalNumber(int globalNumber);
 
   /**
    * Get the node at the specified index location
    */
   Node::Pointer GetNode(NodeIdentifier index);
+  Node::ConstPointer GetNode(NodeIdentifier index) const;
 
   /**
    * Get the Node at with the specified global number
@@ -229,16 +232,19 @@ public:
   /**
    * Get the material data at the specified index location
    */
+  Material::ConstPointer GetMaterial(MaterialIdentifier index) const;
   Material::Pointer GetMaterial(MaterialIdentifier index);
 
   /**
    * Get the Material at with the specified global number
    */
+  Material::ConstPointer GetMaterialWithGlobalNumber(int globalNumber) const;
   Material::Pointer GetMaterialWithGlobalNumber(int globalNumber);
 
   /**
    * Get the load data at the specified index location
    */
+  Load::ConstPointer GetLoad(LoadIdentifier index) const;
   Load::Pointer GetLoad(LoadIdentifier index);
 
   /**

@@ -50,7 +50,7 @@ void LoadEdge::SetEdge(int edge)
   this->m_Edge = edge;
 }
 
-int LoadEdge::GetEdge()
+int LoadEdge::GetEdge() const
 {
   return this->m_Edge;
 }
@@ -58,6 +58,11 @@ int LoadEdge::GetEdge()
 void LoadEdge::SetForce(const vnl_matrix<itk::fem::Element::Float> force)
 {
   this->m_Force = force;
+}
+
+const vnl_matrix<itk::fem::Element::Float> & LoadEdge::GetForce() const
+{
+  return this->m_Force;
 }
 
 vnl_matrix<itk::fem::Element::Float> & LoadEdge::GetForce()

@@ -2,7 +2,6 @@ set(ITK-SpatialObjects_SRC
 itkCylinderSpatialObject.cxx
 itkSpatialObjectFactoryBase.cxx
 itkMetaObjectConverterFactory.cxx
-itkSpatialObjectConverterFactory.cxx
 )
 
 add_library(ITK-SpatialObjects ${ITK-SpatialObjects_SRC})
