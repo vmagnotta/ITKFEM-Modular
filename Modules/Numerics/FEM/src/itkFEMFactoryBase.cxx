@@ -47,7 +47,6 @@ PURPOSE.  See the above copyright notices for more information.
 
 #include "itkFEMUtility.h"
 #include "itkMetaObjectConverterFactory.h"
-#include "itkSpatialObjectConverterFactory.h"
 #include "metaFEMObject.h"
 #include "itkMetaFEMObjectConverter.h"
 
